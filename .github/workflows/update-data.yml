@@ -43,5 +43,8 @@ jobs:
             echo "Nenhuma mudança nos dados publicados."
           else
             git commit -m "chore(data): atualização automática dos dados do TSE"
+            # Rebase antes do push: outro commit pode ter chegado durante o ETL.
+            # Em conflito nos dados gerados, prevalece a versão recém-gerada.
+            git pull --rebase -X theirs origin main
             git push
           fi
