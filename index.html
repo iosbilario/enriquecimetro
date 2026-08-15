@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Enriquecímetro — a evolução do patrimônio declarado pelos candidatos brasileiros</title>
+  <meta name="description" content="Como mudou o patrimônio declarado pelos candidatos brasileiros à Justiça Eleitoral entre as eleições de 2022 e 2026. Dados oficiais do TSE, metodologia aberta.">
+  <link rel="canonical" href="./">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Enriquecímetro">
+  <meta property="og:description" content="A evolução do patrimônio declarado pelos candidatos brasileiros. Mostramos os números. Não presumimos a origem.">
+  <meta property="og:locale" content="pt_BR">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Enriquecímetro">
+  <meta name="twitter:description" content="A evolução do patrimônio declarado pelos candidatos brasileiros, com dados oficiais do TSE.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="stylesheet" href="public/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Pular para o conteúdo</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="./">Enriquecí<span class="tld">metro</span></a>
+      <nav class="site-nav" aria-label="Navegação principal">
+        <a href="./" aria-current="page">Início</a>
+        <a href="methodology.html">Metodologia</a>
+        <a href="about.html">Sobre</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <section class="hero">
+      <h1>Enriquecímetro</h1>
+      <p class="tagline">A evolução do patrimônio declarado pelos candidatos brasileiros — eleições de 2022 e 2026</p>
+      <p class="principle">Mostramos os números. Não presumimos a origem.</p>
+
+      <div class="search-block">
+        <label for="search" class="visually-hidden" style="position:absolute;left:-9999px">Pesquise um candidato</label>
+        <input type="search" id="search" placeholder="Pesquise um candidato — nome, nome de urna ou partido" autocomplete="off">
+        <p class="search-hint">A busca ignora acentos e maiúsculas. Ex.: “joao” encontra “João”.</p>
+      </div>
+
+      <div class="filters" role="group" aria-label="Filtros">
+        <select id="f-office" aria-label="Filtrar por cargo">
+          <option value="">Todos os cargos</option>
+        </select>
+        <select id="f-uf" aria-label="Filtrar por estado">
+          <option value="">Todos os estados</option>
+        </select>
+        <select id="f-party" aria-label="Filtrar por partido">
+          <option value="">Todos os partidos</option>
+        </select>
+        <select id="f-range" aria-label="Filtrar por faixa patrimonial">
+          <option value="">Todas as faixas patrimoniais</option>
+          <option value="ate-100k">Até R$ 100 mil</option>
+          <option value="100k-1m">R$ 100 mil a R$ 1 milhão</option>
+          <option value="1m-10m">R$ 1 milhão a R$ 10 milhões</option>
+          <option value="acima-10m">Acima de R$ 10 milhões</option>
+        </select>
+        <button id="clear" class="clear-btn" type="button">Limpar filtros</button>
+      </div>
+      <p class="status-line" id="updated-at"></p>
+    </section>
+
+    <section aria-labelledby="ranking-title">
+      <div class="section-head">
+        <h2 id="ranking-title">Maiores variações patrimoniais declaradas</h2>
+        <label class="sort-select">Ordenar por
+          <select id="sort">
+            <option value="top_increase_abs">Maior aumento nominal</option>
+            <option value="top_increase_pct">Maior aumento percentual</option>
+            <option value="top_assets">Maior patrimônio atual</option>
+            <option value="top_decrease_abs">Maior redução nominal</option>
+            <option value="top_multiple">Patrimônio que mais multiplicou</option>
+            <option value="name">Nome (A–Z)</option>
+          </select>
+        </label>
+      </div>
+      <p class="note">Os valores representam bens declarados pelos próprios candidatos à Justiça Eleitoral.
+        Uma variação patrimonial, isoladamente, não indica irregularidade.</p>
+
+      <p class="status-line" id="result-status" role="status" aria-live="polite"></p>
+      <ul class="cards" id="results" aria-busy="true"></ul>
+      <p class="empty" id="empty" hidden>Nenhuma candidatura encontrada com esses critérios.</p>
+      <div class="more-row" id="more" hidden>
+        <button id="more-btn" type="button">Mostrar mais</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p class="disclaimer">Uma variação patrimonial elevada, por si só, não representa evidência de
+        irregularidade. Os valores exibidos correspondem às declarações apresentadas à Justiça Eleitoral.</p>
+      <nav aria-label="Rodapé">
+        <a href="about.html">Sobre</a>
+        <a href="methodology.html">Metodologia</a>
+        <a href="methodology.html#fontes">Fontes</a>
+        <a href="https://github.com/" id="gh-link" rel="noopener">GitHub</a>
+        <a href="about.html#licenca">Licença</a>
+      </nav>
+      <p>Projeto independente, apartidário e sem fins lucrativos. Sem vínculo com o TSE.
+        Fonte dos dados: Tribunal Superior Eleitoral — Portal de Dados Abertos.</p>
+    </div>
+  </footer>
+
+  <script src="public/js/common.js"></script>
+  <script src="public/js/app.js"></script>
+</body>
+</html>

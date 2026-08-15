@@ -1,0 +1,47 @@
+name: Atualizar dados do TSE
+
+on:
+  schedule:
+    # Diariamente às 08:23 UTC (05:23 em Brasília). Horário "quebrado" de
+    # propósito: evita os picos de carga do agendador do GitHub.
+    - cron: "23 8 * * *"
+  workflow_dispatch: {}
+
+# Evita loop: este workflow NÃO dispara em push. O commit que ele cria
+# aciona apenas o deploy do Pages, que não commita nada.
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Rodar testes
+        run: python -m unittest discover -s tests -v
+
+      - name: Executar pipeline (download + ETL + validação + publicação)
+        run: python scripts/run_pipeline.py
+
+      - name: Commitar dados atualizados (somente se houver mudanças)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data
+          if git diff --cached --quiet; then
+            echo "Nenhuma mudança nos dados publicados."
+          else
+            git commit -m "chore(data): atualização automática dos dados do TSE"
+            git push
+          fi

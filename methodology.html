@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Metodologia | Enriquecímetro</title>
+  <meta name="description" content="Como o Enriquecímetro coleta, processa e apresenta os dados de patrimônio declarado pelos candidatos ao TSE. Metodologia completa e aberta.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="stylesheet" href="public/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Pular para o conteúdo</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="./">Enriquecí<span class="tld">metro</span></a>
+      <nav class="site-nav" aria-label="Navegação principal">
+        <a href="./">Início</a>
+        <a href="methodology.html" aria-current="page">Metodologia</a>
+        <a href="about.html">Sobre</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap prose">
+    <h1 style="font-family:var(--serif);margin-top:34px">Metodologia</h1>
+    <blockquote>O projeto não determina a origem do patrimônio, não realiza investigação financeira
+      e não classifica qualquer variação como lícita ou ilícita. Seu objetivo é exclusivamente
+      facilitar a visualização e comparação de informações declaradas publicamente à Justiça
+      Eleitoral.</blockquote>
+
+    <h2 id="fontes">1. De onde vêm os dados</h2>
+    <p>Todos os dados vêm do <a href="https://dadosabertos.tse.jus.br/" rel="noopener">Portal de Dados
+      Abertos do Tribunal Superior Eleitoral (TSE)</a>, a fonte oficial da Justiça Eleitoral. São
+      usados dois conjuntos por eleição:</p>
+    <ul>
+      <li><strong>Candidatos</strong> (<code>consulta_cand</code>) — dados cadastrais das candidaturas;</li>
+      <li><strong>Bens de candidatos</strong> (<code>bem_candidato</code>) — a relação de bens que cada
+        candidato declarou no registro de candidatura.</li>
+    </ul>
+    <p>URLs exatas dos arquivos utilizados, a data de modificação informada pelo TSE e a data do
+      nosso download ficam registradas no manifesto público
+      <a href="public/data/meta.json"><code>meta.json</code></a> e no rodapé de cada página de candidato.
+      Nenhum site de terceiros é usado como fonte.</p>
+
+    <h2>2. Como os dados são baixados</h2>
+    <p>Uma rotina automática (GitHub Actions) baixa os arquivos ZIP oficiais uma vez por dia,
+      diretamente do CDN do TSE. Como os dados de 2026 ainda podem sofrer atualizações (novos
+      registros, substituições, indeferimentos), o site sempre informa quando os dados foram
+      processados pela última vez. Todo o código do robô é público no repositório do projeto.</p>
+
+    <h2>3. Como os bens são somados</h2>
+    <p>Para cada candidatura, somamos o valor de todos os bens da declaração
+      (<code>VR_BEM_CANDIDATO</code>). O resultado é o <strong>total declarado</strong> daquela
+      eleição. Os valores são lidos no formato monetário brasileiro e tratados em centavos para
+      evitar erros de arredondamento. Não fazemos nenhuma inferência de valor de mercado: o valor
+      apresentado é sempre o <em>valor declarado à Justiça Eleitoral</em>, nominal, da época da
+      declaração.</p>
+
+    <h2 id="matching">4. Como relacionamos a mesma pessoa entre eleições</h2>
+    <p>Nomes não bastam — homônimos são comuns. Usamos três níveis, e nunca inventamos
+      correspondência:</p>
+    <ul>
+      <li><strong>exact</strong> — o identificador pessoal presente nos arquivos públicos do TSE
+        coincide entre as duas eleições e é único em cada uma. Esse identificador é usado
+        <em>somente durante o processamento interno</em> e nunca é publicado (ver seção
+        Privacidade).</li>
+      <li><strong>probable</strong> — quando o identificador está ausente ou inválido em um dos
+        lados, aceitamos a combinação exata e única de <em>nome completo normalizado + data de
+        nascimento</em>.</li>
+      <li><strong>unverified</strong> — nenhuma correspondência segura foi possível. A candidatura
+        aparece no site com os dados de uma única eleição, sem comparação.</li>
+    </ul>
+    <p><strong>Somente correspondências “exact” entram nos rankings comparativos.</strong> Casos
+      ambíguos (por exemplo, o mesmo identificador aparecendo em duas candidaturas na mesma
+      eleição) são rebaixados para <code>unverified</code>.</p>
+
+    <h2>5. Como as variações são calculadas</h2>
+    <ul>
+      <li><strong>Variação nominal</strong>: <code>patrimônio 2026 − patrimônio 2022</code>;</li>
+      <li><strong>Variação percentual</strong>: <code>(2026 − 2022) ÷ 2022 × 100</code>;</li>
+      <li><strong>Multiplicador</strong>: <code>2026 ÷ 2022</code> (ex.: R$ 100 mil → R$ 500 mil = 5×).</li>
+    </ul>
+    <p>Quando o patrimônio anterior é <strong>R$ 0</strong>, a variação percentual e o multiplicador
+      são matematicamente indefinidos; o site exibe “Não aplicável — patrimônio anterior declarado
+      como R$ 0”, nunca “infinito %”.</p>
+
+    <h2 id="outliers">6. Indicador estatístico de variação atípica</h2>
+    <p>Algumas listagens exibem o selo <em>“variação atípica no conjunto”</em>. Ele é um indicador
+      puramente descritivo, calculado pelo método de Tukey: marcamos as variações percentuais acima
+      de <code>Q3 + 3×IQR</code> (terceiro quartil mais três vezes o intervalo interquartil) do
+      conjunto de candidaturas com correspondência exata e patrimônio anterior maior que zero. O
+      limiar vigente e o tamanho da amostra são publicados em <code>meta.json</code>. O selo
+      significa apenas “muito acima do padrão do conjunto analisado” — <strong>não é um índice de
+      suspeita</strong> e não implica qualquer juízo sobre a origem do patrimônio.</p>
+
+    <h2>7. Inflação</h2>
+    <p>Todos os valores exibidos hoje são <strong>nominais</strong>. Uma comparação corrigida pela
+      inflação (IPCA/IBGE) está prevista na arquitetura como funcionalidade separada — quando
+      implementada, a variação nominal e a variação real estimada serão sempre apresentadas em
+      campos claramente distintos, nunca misturadas. Status: planejado (TODO documentado no
+      repositório).</p>
+
+    <h2 id="privacidade">8. Privacidade e minimização de dados</h2>
+    <p>Os arquivos do TSE contêm campos pessoais (CPF, e-mail, título de eleitor). Nossa política:</p>
+    <ul>
+      <li>identificadores pessoais são usados <em>apenas em memória/arquivos temporários</em> durante
+        o relacionamento entre eleições;</li>
+      <li>nunca aparecem no site, nos JSONs publicados, em URLs, em logs ou no repositório;</li>
+      <li>o ID público de cada candidato é derivado exclusivamente do número sequencial de
+        candidatura (SQ_CANDIDATO), que já é público — é impossível reconstruir CPF a partir dele;</li>
+      <li>uma validação automática varre todos os arquivos antes da publicação e <strong>aborta o
+        deploy</strong> se detectar qualquer identificador pessoal.</li>
+    </ul>
+
+    <h2>9. Limitações conhecidas</h2>
+    <ul>
+      <li>As declarações são autodeclaratórias; o TSE não afere valor de mercado, e nós tampouco.</li>
+      <li>Os dados de 2026 são preliminares até a conclusão do registro de candidaturas e podem
+        mudar diariamente.</li>
+      <li>Candidaturas sem identificador válido podem ficar sem comparação mesmo quando a pessoa
+        concorreu duas vezes.</li>
+      <li>Valores nominais não consideram inflação (ver seção 7).</li>
+      <li>Mudanças de regime de bens, partilhas e heranças não são detectáveis nos dados.</li>
+    </ul>
+
+    <h2>10. O que o projeto não pretende concluir</h2>
+    <p>O Enriquecímetro não afirma nem insinua que qualquer variação patrimonial constitui
+      enriquecimento ilícito, corrupção ou irregularidade. A metodologia é idêntica para todos os
+      candidatos, partidos, estados e cargos — o código que gera os rankings não contém qualquer
+      lista partidária ou exceção política, o que pode ser verificado no repositório aberto.</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p class="disclaimer">Uma variação patrimonial elevada, por si só, não representa evidência de
+        irregularidade. Os valores exibidos correspondem às declarações apresentadas à Justiça Eleitoral.</p>
+      <nav aria-label="Rodapé">
+        <a href="about.html">Sobre</a>
+        <a href="methodology.html">Metodologia</a>
+        <a href="https://github.com/" id="gh-link" rel="noopener">GitHub</a>
+        <a href="about.html#licenca">Licença</a>
+      </nav>
+      <p>Projeto independente, apartidário e sem fins lucrativos. Sem vínculo com o TSE.</p>
+    </div>
+  </footer>
+</body>
+</html>

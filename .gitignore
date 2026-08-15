@@ -1,0 +1,16 @@
+# Dados brutos e intermediários (contêm campos pessoais do TSE — nunca commitar)
+data_raw/
+data_work/
+public/data.old/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Config local do Claude Code
+.claude/

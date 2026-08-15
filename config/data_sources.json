@@ -1,0 +1,41 @@
+{
+  "project": "Enriquecímetro",
+  "elections": [2022, 2026],
+  "planned_elections": [2014, 2018],
+  "datasets": {
+    "2022": {
+      "candidates": "https://cdn.tse.jus.br/estatistica/sead/odsele/consulta_cand/consulta_cand_2022.zip",
+      "assets": "https://cdn.tse.jus.br/estatistica/sead/odsele/bem_candidato/bem_candidato_2022.zip"
+    },
+    "2026": {
+      "candidates": "https://cdn.tse.jus.br/estatistica/sead/odsele/consulta_cand/consulta_cand_2026.zip",
+      "assets": "https://cdn.tse.jus.br/estatistica/sead/odsele/bem_candidato/bem_candidato_2026.zip"
+    },
+    "2018": {
+      "candidates": "https://cdn.tse.jus.br/estatistica/sead/odsele/consulta_cand/consulta_cand_2018.zip",
+      "assets": "https://cdn.tse.jus.br/estatistica/sead/odsele/bem_candidato/bem_candidato_2018.zip"
+    },
+    "2014": {
+      "candidates": "https://cdn.tse.jus.br/estatistica/sead/odsele/consulta_cand/consulta_cand_2014.zip",
+      "assets": "https://cdn.tse.jus.br/estatistica/sead/odsele/bem_candidato/bem_candidato_2014.zip"
+    }
+  },
+  "attribution": {
+    "source_name": "Tribunal Superior Eleitoral — Portal de Dados Abertos",
+    "portal_url": "https://dadosabertos.tse.jus.br/",
+    "license_note": "Dados públicos disponibilizados pelo TSE no Portal de Dados Abertos (ODbL / dados abertos governamentais)."
+  },
+  "validation": {
+    "min_candidates_per_election": 50,
+    "max_candidates_per_election": 1000000
+  },
+  "paths": {
+    "download_dir": "data_raw",
+    "work_dir": "data_work",
+    "output_dir": "public/data"
+  },
+  "ranking_size": 100,
+  "todo": {
+    "inflation_adjustment": "Correção pelo IPCA/IBGE planejada. Fonte prevista: API SIDRA do IBGE (tabela 1737). Ver methodology.html seção 'Inflação'."
+  }
+}

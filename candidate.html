@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evolução do patrimônio declarado | Enriquecímetro</title>
+  <meta name="description" content="Evolução do patrimônio declarado à Justiça Eleitoral.">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Evolução do patrimônio declarado | Enriquecímetro">
+  <meta property="og:locale" content="pt_BR">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="stylesheet" href="public/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Pular para o conteúdo</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="./">Enriquecí<span class="tld">metro</span></a>
+      <nav class="site-nav" aria-label="Navegação principal">
+        <a href="./">Início</a>
+        <a href="methodology.html">Metodologia</a>
+        <a href="about.html">Sobre</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap" >
+    <div id="profile">
+      <div class="profile-head">
+        <h1 id="p-name">Carregando…</h1>
+        <p class="ballot" id="p-ballot"></p>
+        <div class="chips" id="p-chips"></div>
+      </div>
+
+      <section aria-labelledby="evo-title">
+        <h2 id="evo-title">Evolução patrimonial declarada</h2>
+        <div class="timeline">
+          <div class="big-flow" id="big-flow"></div>
+          <div class="big-delta" id="big-delta"></div>
+          <figure class="chart-box">
+            <div id="chart"></div>
+            <figcaption>Valores declarados à Justiça Eleitoral, em reais nominais da época de cada declaração.
+              O eixo do gráfico sempre parte de zero.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <div id="assets"></div>
+
+      <section class="prose">
+        <h2>O que esses números significam?</h2>
+        <p>Todo candidato é obrigado a apresentar à Justiça Eleitoral, no registro da candidatura,
+          uma relação dos bens que possui — imóveis, veículos, aplicações, participações em empresas,
+          entre outros. Os valores exibidos nesta página são exatamente os que constam nessas
+          declarações públicas, sem qualquer ajuste, estimativa de mercado ou correção monetária.</p>
+        <p>Uma variação entre duas eleições pode ter muitas explicações: valorização ou venda de bens,
+          herança, rendimentos do trabalho, mudança na forma de declarar, casamento ou divórcio,
+          entre outras. <strong>Este site não determina a origem do patrimônio e não classifica
+          qualquer variação como lícita ou ilícita.</strong></p>
+      </section>
+
+      <section class="prose">
+        <h2>Fonte dos dados</h2>
+        <p>Tribunal Superior Eleitoral — <a href="https://dadosabertos.tse.jus.br/" rel="noopener">Portal de Dados Abertos</a>.</p>
+        <ul id="source-list"></ul>
+        <p>Dados processados em <span id="gen-at">—</span>.
+          Consulte a <a href="methodology.html">metodologia completa</a>.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p class="disclaimer">Uma variação patrimonial elevada, por si só, não representa evidência de
+        irregularidade. Os valores exibidos correspondem às declarações apresentadas à Justiça Eleitoral.</p>
+      <nav aria-label="Rodapé">
+        <a href="about.html">Sobre</a>
+        <a href="methodology.html">Metodologia</a>
+        <a href="methodology.html#fontes">Fontes</a>
+        <a href="https://github.com/" id="gh-link" rel="noopener">GitHub</a>
+        <a href="about.html#licenca">Licença</a>
+      </nav>
+      <p>Projeto independente, apartidário e sem fins lucrativos. Sem vínculo com o TSE.</p>
+    </div>
+  </footer>
+
+  <script src="public/js/common.js"></script>
+  <script src="public/js/candidate.js"></script>
+</body>
+</html>
