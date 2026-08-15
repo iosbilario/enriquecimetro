@@ -77,9 +77,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   letter-spacing: -0.01em;
   display: flex;
   align-items: center;
-  gap: 10px;
 }
-.brand img { width: 32px; height: 32px; border-radius: 8px; display: block; }
+.brand img { width: 32px; height: 32px; border-radius: 8px; display: block; margin-right: 10px; }
 .brand .tld { color: var(--accent); }
 .site-nav { display: flex; gap: 16px; flex-wrap: wrap; }
 .site-nav a {
