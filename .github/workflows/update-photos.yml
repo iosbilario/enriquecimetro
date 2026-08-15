@@ -1,0 +1,61 @@
+name: Atualizar fotos dos candidatos
+
+on:
+  schedule:
+    # Semanal (fotos mudam raramente — só com novos registros/substituições).
+    - cron: "41 9 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: update-photos
+  cancel-in-progress: false
+
+jobs:
+  photos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar Pillow
+        run: pip install -r requirements.txt
+
+      - name: Rodar testes
+        run: python -m unittest discover -s tests -v
+
+      - name: Preparar dados de matching (download + transform + match)
+        run: |
+          python scripts/download.py
+          python scripts/transform.py
+          python scripts/match_candidates.py
+
+      - name: Gerar miniaturas das fotos
+        run: python scripts/fetch_photos.py
+
+      - name: Commitar fotos (somente se houver mudanças)
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/photos
+          if git diff --cached --quiet; then
+            echo "Nenhuma foto nova."
+          else
+            git commit -m "chore(photos): atualização das fotos oficiais de urna (TSE)"
+            git pull --rebase -X theirs origin main
+            git push
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Disparar deploy do site
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref main

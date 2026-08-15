@@ -100,6 +100,31 @@ const ENR = (() => {
     return node;
   }
 
+  function initials(name) {
+    const words = (name || "").trim().split(/\s+/).filter(Boolean);
+    if (!words.length) return "?";
+    const first = words[0][0] || "";
+    const last = words.length > 1 ? words[words.length - 1][0] : "";
+    return (first + last).toUpperCase();
+  }
+
+  /* Avatar com foto oficial de urna (TSE) e fallback para iniciais.
+     Fotos existem apenas para candidaturas com comparação entre eleições. */
+  function avatar(item, { large = false, hasPhoto = true } = {}) {
+    const cls = large ? "avatar-fallback avatar-lg" : "avatar-fallback";
+    const fallback = el("div", { class: cls, "aria-hidden": "true" },
+      initials(item.ballot_name || item.name));
+    if (!hasPhoto) return fallback;
+    const img = el("img", {
+      class: large ? "avatar avatar-lg" : "avatar",
+      alt: "",
+      loading: "lazy",
+      src: `public/photos/${item.id}.webp`,
+    });
+    img.addEventListener("error", () => img.replaceWith(fallback), { once: true });
+    return img;
+  }
+
   function fmtDate(iso) {
     if (!iso) return "—";
     try {
@@ -113,5 +138,5 @@ const ENR = (() => {
     }
   }
 
-  return { money, moneyCompact, pct, normalize, titleCase, fetchJSON, inflate, debounce, el, fmtDate };
+  return { money, moneyCompact, pct, normalize, titleCase, fetchJSON, inflate, debounce, el, fmtDate, avatar };
 })();

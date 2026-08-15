@@ -1,0 +1,4 @@
+# O pipeline principal de dados usa APENAS a biblioteca padrão do Python.
+# Pillow é necessário somente para scripts/fetch_photos.py (miniaturas das
+# fotos oficiais de urna) — usado pelo workflow update-photos.yml.
+Pillow>=10.0

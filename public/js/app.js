@@ -2,7 +2,7 @@
 "use strict";
 
 (() => {
-  const { money, moneyCompact, pct, normalize, titleCase, fetchJSON, inflate, debounce, el, fmtDate } = ENR;
+  const { money, moneyCompact, pct, normalize, titleCase, fetchJSON, inflate, debounce, el, fmtDate, avatar } = ENR;
 
   const state = {
     all: null,          // índice completo (lazy)
@@ -95,15 +95,20 @@
       el(
         "div",
         { class: "who" },
-        el("h3", { class: "name" }, titleCase(item.ballot_name || item.name)),
+        avatar(item, { hasPhoto: hasBoth }),
         el(
-          "p",
-          { class: "meta" },
-          item.party || "—",
-          el("span", { class: "sep", "aria-hidden": "true" }, "·"),
-          item.uf || "—",
-          el("span", { class: "sep", "aria-hidden": "true" }, "·"),
-          titleCase(item.office || "")
+          "div",
+          { class: "who-text" },
+          el("h3", { class: "name" }, titleCase(item.ballot_name || item.name)),
+          el(
+            "p",
+            { class: "meta" },
+            item.party || "—",
+            el("span", { class: "sep", "aria-hidden": "true" }, "·"),
+            item.uf || "—",
+            el("span", { class: "sep", "aria-hidden": "true" }, "·"),
+            titleCase(item.office || "")
+          )
         )
       ),
       el(

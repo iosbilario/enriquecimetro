@@ -187,7 +187,34 @@ h2 {
   flex-direction: column;
   gap: 8px;
 }
-.card .who { min-height: 3.2em; }
+.card .who { min-height: 3.2em; display: flex; gap: 12px; align-items: flex-start; }
+.card .who .who-text { min-width: 0; }
+
+/* ---------- avatares ---------- */
+.avatar, .avatar-fallback {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  object-fit: cover;
+  background: var(--chip);
+  border: 1px solid var(--line);
+}
+.avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink-faint);
+  font-family: var(--serif);
+}
+.avatar-lg, .avatar-fallback.avatar-lg {
+  width: 84px;
+  height: 84px;
+  font-size: 1.6rem;
+}
+.profile-id { display: flex; gap: 16px; align-items: center; }
 .card .name {
   font-family: var(--serif);
   font-weight: 700;

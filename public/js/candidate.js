@@ -2,7 +2,7 @@
 "use strict";
 
 (() => {
-  const { money, moneyCompact, pct, titleCase, fetchJSON, el, fmtDate } = ENR;
+  const { money, moneyCompact, pct, titleCase, fetchJSON, el, fmtDate, avatar } = ENR;
   const $ = (sel) => document.querySelector(sel);
 
   function svgBarChart(entries) {
@@ -122,6 +122,12 @@
     if (desc) desc.content =
       `Patrimônio declarado por ${displayName} à Justiça Eleitoral nas eleições de ${years.join(" e ")}.`;
 
+    $("#p-avatar").replaceWith(
+      avatar(detail, {
+        large: true,
+        hasPhoto: years.length > 1 && ["exact", "probable"].includes(detail.match_status),
+      })
+    );
     $("#p-name").textContent = displayName;
     $("#p-ballot").textContent = `Nome de urna: ${titleCase(detail.ballot_name)}`;
     const chips = $("#p-chips");

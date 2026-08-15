@@ -20,6 +20,13 @@
       "assets": "https://cdn.tse.jus.br/estatistica/sead/odsele/bem_candidato/bem_candidato_2014.zip"
     }
   },
+  "photos": {
+    "url_template": "https://cdn.tse.jus.br/estatistica/sead/eleicoes/eleicoes{year}/fotos/foto_cand{year}_{uf}_div.zip",
+    "election": 2026,
+    "thumbnail_px": 96,
+    "match_statuses": ["exact", "probable"],
+    "output_dir": "public/photos"
+  },
   "attribution": {
     "source_name": "Tribunal Superior Eleitoral — Portal de Dados Abertos",
     "portal_url": "https://dadosabertos.tse.jus.br/",
