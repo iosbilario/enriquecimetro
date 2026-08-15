@@ -55,14 +55,15 @@
     if (state.all) return state.all;
     const doc = await fetchJSON("public/data/search-index.json");
     state.all = inflate(doc);
-    fillFilterOptions(state.all);
     return state.all;
   }
 
-  function fillFilterOptions(items) {
-    const ufs = [...new Set(items.map((i) => i.uf).filter(Boolean))].sort();
-    const parties = [...new Set(items.map((i) => i.party).filter(Boolean))].sort();
-    const offices = [...new Set(items.map((i) => i.office).filter(Boolean))].sort();
+  /* Opções vêm do meta.json (leve), preenchidas já na inicialização —
+     o índice de busca (pesado) segue carregando só sob demanda. */
+  function fillFilterOptions(filters) {
+    const ufs = filters?.uf || [];
+    const parties = filters?.party || [];
+    const offices = filters?.office || [];
     const fill = (sel, values, current, fmt = (v) => v) => {
       const node = $(sel);
       const keep = node.firstElementChild;
@@ -214,6 +215,8 @@
     $("#updated-at").textContent =
       `Dados do TSE processados em ${fmtDate(meta.generated_at)} · ` +
       `${(meta.candidate_count?.["2026"] ?? 0).toLocaleString("pt-BR")} candidaturas em 2026`;
+
+    fillFilterOptions(meta.filters);
 
     const search = $("#search");
     search.value = state.query;

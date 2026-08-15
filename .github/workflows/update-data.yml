@@ -35,6 +35,7 @@ jobs:
         run: python scripts/run_pipeline.py
 
       - name: Commitar dados atualizados (somente se houver mudanças)
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -47,4 +48,13 @@ jobs:
             # Em conflito nos dados gerados, prevalece a versão recém-gerada.
             git pull --rebase -X theirs origin main
             git push
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Disparar deploy do site
+        # Commits feitos com GITHUB_TOKEN não disparam outros workflows
+        # (proteção anti-recursão); despachamos o deploy explicitamente.
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref main
