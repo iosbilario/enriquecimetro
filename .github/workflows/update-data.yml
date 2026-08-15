@@ -11,6 +11,7 @@ on:
 # aciona apenas o deploy do Pages, que não commita nada.
 permissions:
   contents: write
+  actions: write  # necessário para despachar o deploy-pages.yml ao final
 
 concurrency:
   group: update-data
