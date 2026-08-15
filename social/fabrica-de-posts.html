@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fábrica de Posts — Enriquecímetro</title>
+<meta name="description" content="Gere cards para redes sociais com os dados oficiais de patrimônio declarado ao TSE. Escolha ranking, candidato e formato — baixe o PNG pronto.">
+<link rel="icon" type="image/svg+xml" href="../public/assets/logo.svg">
+<link rel="canonical" href="https://iosbilario.github.io/enriquecimetro/social/fabrica-de-posts.html">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --bg:#faf9f6; --card:#ffffff; --ink:#1a1a1a; --ink-soft:#514e48; --ink-faint:#6b675f;
+    --line:#e4e1da; --accent:#1f4e79; --accent-soft:#eaf1f7; --down:#a15c2f; --chip:#f0eee9;
+    --navy:#14161a; --navy-card:#1c1f25; --cream:#faf9f6; --accent-lt:#7aa9d4; --down-lt:#cf9165;
+    --serif:Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans)}
+  header{border-bottom:1px solid var(--line);padding:14px 24px;display:flex;align-items:center;gap:14px}
+  header h1{font-family:var(--serif);font-size:1.25rem;margin:0}
+  header h1 span{color:var(--accent)}
+  header p{margin:0;color:var(--ink-faint);font-size:.85rem}
+  .app{display:grid;grid-template-columns:340px 1fr;gap:0;min-height:calc(100vh - 61px)}
+  .panel{border-right:1px solid var(--line);padding:20px;background:var(--card)}
+  .panel label{display:block;font-size:.8rem;color:var(--ink-soft);margin:14px 0 4px;font-weight:600}
+  .panel select,.panel input[type=text]{width:100%;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);font-size:.9rem;color:var(--ink)}
+  .panel .row{display:flex;gap:8px}
+  .seg{display:flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;margin-top:4px}
+  .seg button{flex:1;border:0;background:transparent;padding:8px 4px;font-size:.8rem;cursor:pointer;color:var(--ink-soft)}
+  .seg button.on{background:var(--accent);color:#fff}
+  .go{margin-top:22px;width:100%;padding:13px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-size:1rem;font-weight:700;cursor:pointer}
+  .go:hover{filter:brightness(1.1)}
+  .hint{font-size:.75rem;color:var(--ink-faint);margin-top:10px;line-height:1.45}
+  #status{font-size:.8rem;margin-top:10px;color:var(--accent)}
+  .stage{display:flex;align-items:flex-start;justify-content:center;padding:30px;overflow:auto}
+  #scaler{transform-origin:top center}
+  header .back{margin-left:auto;font-size:.85rem;color:var(--accent);text-decoration:none;white-space:nowrap}
+  header img.lg{width:30px;height:30px;border-radius:7px;flex:none}
+  /* mobile: painel empilha sobre o preview */
+  @media(max-width:900px){
+    .app{grid-template-columns:1fr;min-height:auto}
+    .panel{border-right:0;border-bottom:1px solid var(--line)}
+    .stage{padding:16px 10px 40px}
+    header{flex-wrap:wrap;gap:8px}
+    header p{width:100%}
+  }
+  /* ============ CARD (1080 base) ============ */
+  .post{width:1080px;background:var(--bg);font-family:var(--sans);position:relative;display:flex;flex-direction:column;overflow:hidden}
+  .post.feed{height:1080px}
+  .post.story{height:1920px}
+  .post .topbar{height:14px;background:var(--accent);flex:none}
+  .post .inner{flex:1;display:flex;flex-direction:column;padding:64px 72px 0}
+  .post .kicker{font-size:30px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:700}
+  .post .headline{font-family:var(--serif);color:var(--ink);font-weight:700;line-height:1.04;margin:18px 0 0}
+  .post .big{font-family:var(--serif);color:var(--accent);font-weight:700;line-height:1;letter-spacing:-.01em}
+  .post .sub{color:var(--ink-soft);line-height:1.35}
+  .post .who{margin-top:auto;display:flex;align-items:center;gap:32px}
+  .post .cface{width:148px;height:148px;border-radius:50%;object-fit:cover;flex:none;
+               border:5px solid var(--line);background:var(--chip)}
+  .post.story .cface{width:180px;height:180px}
+  .post .name{font-family:var(--serif);font-size:52px;font-weight:700;color:var(--ink)}
+  .post .chips{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap}
+  .post .chip{background:var(--chip);border:1px solid var(--line);color:var(--ink-soft);font-size:26px;padding:8px 20px;border-radius:999px;font-weight:600}
+  .post .chip.warn{background:#fdf3ec;border-color:#ecd3bd;color:var(--down)}
+  .bars{margin:44px 0 0}
+  .bar-row{display:grid;grid-template-columns:120px 1fr 260px;align-items:center;gap:20px;margin-top:20px}
+  .bar-row .yr{font-size:30px;font-weight:700;color:var(--ink-faint)}
+  .bar-row .track{height:54px;border-radius:8px;background:transparent;position:relative}
+  .bar-row .fill{height:100%;border-radius:6px;min-width:10px}
+  .bar-row.b2022 .fill{background:#b9cfe2}
+  .bar-row.b2026 .fill{background:var(--accent)}
+  .bar-row .val{font-size:34px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+  .post .footer{flex:none;border-top:1px solid var(--line);margin-top:40px;padding:24px 72px 28px;display:flex;justify-content:space-between;align-items:center;gap:30px}
+  .post .footer .src{font-size:22px;color:var(--ink-faint);line-height:1.4;max-width:640px}
+  .post .footer .at{font-family:var(--serif);font-size:30px;color:var(--accent);font-weight:700;white-space:nowrap}
+  /* ranking list */
+  .rk{margin-top:34px}
+  .rk-row{display:grid;grid-template-columns:60px 92px 1fr 300px;gap:18px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+  .rk-row .pos{font-family:var(--serif);font-size:40px;color:var(--ink-faint);font-weight:700}
+  .rk-row .rface{width:84px;height:84px;border-radius:50%;object-fit:cover;
+                 border:3px solid var(--line);background:var(--chip)}
+  .rk-row .nm{font-family:var(--serif);font-size:36px;font-weight:700;color:var(--ink)}
+  .rk-row .meta{font-size:24px;color:var(--ink-faint);margin-top:4px}
+  .rk-row .dv{text-align:right}
+  .rk-row .dv .v{font-size:38px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+  .rk-row .dv .m{font-size:24px;color:var(--ink-faint)}
+  /* dark mode card */
+  .post.dark{background:var(--navy)}
+  .post.dark .headline,.post.dark .name{color:var(--cream)}
+  .post.dark .big{color:var(--accent-lt)}
+  .post.dark .kicker,.post.dark .bar-row .yr,.post.dark .footer .src,.post.dark .rk-row .pos,.post.dark .rk-row .meta,.post.dark .rk-row .dv .m{color:#98948c}
+  .post.dark .sub{color:#b3afa7}
+  .post.dark .chip{background:#242830;border-color:#2b2f36;color:#b3afa7}
+  .post.dark .chip.warn{background:#2b2118;border-color:#4a3322;color:var(--down-lt)}
+  .post.dark .bar-row.b2026 .fill{background:var(--accent-lt)}
+  .post.dark .bar-row.b2022 .fill{background:#33455a}
+  .post.dark .bar-row .val,.post.dark .rk-row .nm{color:var(--cream)}
+  .post.dark .rk-row .dv .v{color:var(--accent-lt)}
+  .post.dark .footer{border-color:#2b2f36}
+  .post.dark .footer .at{color:var(--accent-lt)}
+  .post.dark .topbar{background:var(--accent-lt)}
+  .post.dark .cface,.post.dark .rk-row .rface{border-color:#2b2f36;background:#242830}
+</style>
+</head>
+<body>
+<header>
+  <img class="lg" src="../public/assets/logo.svg" alt="">
+  <h1>Enriquecí<span>metro</span> · Fábrica de Posts</h1>
+  <p>Escolha um ranking e um candidato → o card é montado com os dados oficiais → baixe o PNG.</p>
+  <a class="back" href="../">← voltar ao site</a>
+</header>
+<div class="app">
+  <aside class="panel">
+    <label>Ranking</label>
+    <select id="s-rank"></select>
+    <label>Candidato</label>
+    <select id="s-cand"></select>
+    <label>Formato</label>
+    <div class="seg" id="s-fmt">
+      <button data-v="feed" class="on">Feed 1:1</button>
+      <button data-v="story">Story 9:16</button>
+      <button data-v="top5">Top 5</button>
+    </div>
+    <label>Tema</label>
+    <div class="seg" id="s-theme">
+      <button data-v="light" class="on">Claro</button>
+      <button data-v="dark">Escuro</button>
+    </div>
+    <label>Manchete (opcional — deixe vazio para automática)</label>
+    <input type="text" id="s-head" placeholder="Ex.: O ponteiro estourou.">
+    <button class="go" id="btn-dl">⬇ Baixar PNG</button>
+    <p id="status">Carregando dados…</p>
+    <p class="hint">Os valores vêm de <code>rankings.json</code> (bens declarados ao TSE). Cards de candidatos marcados como <b>valor atípico</b> ganham um selo automático — mantenha, é o que protege a credibilidade do perfil.</p>
+  </aside>
+  <div class="stage"><div id="scaler"><div id="post" class="post feed"></div></div></div>
+</div>
+<script>
+const DATA_URLS = ['../public/data/rankings.json','https://iosbilario.github.io/enriquecimetro/public/data/rankings.json'];
+let PHOTO_BASE = '../public/photos/';
+let DB=null, fmt='feed', theme='light';
+const $=s=>document.querySelector(s);
+
+const fmtBRL = v => {
+  const a=Math.abs(v);
+  if(a>=1e9) return 'R$ '+(v/1e9).toLocaleString('pt-BR',{maximumFractionDigits:2})+' bi';
+  if(a>=1e6) return 'R$ '+(v/1e6).toLocaleString('pt-BR',{maximumFractionDigits:1})+' mi';
+  if(a>=1e3) return 'R$ '+(v/1e3).toLocaleString('pt-BR',{maximumFractionDigits:0})+' mil';
+  return 'R$ '+v.toLocaleString('pt-BR',{maximumFractionDigits:0});
+};
+const fmtX = m => m>=100 ? Math.round(m).toLocaleString('pt-BR')+'×' : m.toLocaleString('pt-BR',{maximumFractionDigits:1})+'×';
+const fmtPct = p => (p>=0?'+':'')+ (Math.abs(p)>=1000 ? Math.round(p).toLocaleString('pt-BR') : p.toLocaleString('pt-BR',{maximumFractionDigits:1}))+'%';
+const cap = s => s.toLowerCase().replace(/(^|\s|-)\p{L}/gu, c=>c.toUpperCase());
+const office = o => cap(o).replace('Vice-governador','Vice-Governador(a)');
+
+async function load(){
+  for(const u of DATA_URLS){
+    try{ const r=await fetch(u); if(r.ok){ DB=await r.json();
+      if(u.startsWith('http')) PHOTO_BASE='https://iosbilario.github.io/enriquecimetro/public/photos/';
+      break; } }catch(e){}
+  }
+  if(!DB){ $('#status').textContent='⚠ Não consegui carregar rankings.json (abra este arquivo dentro da pasta do site ou verifique a conexão).'; return; }
+  const sr=$('#s-rank');
+  for(const [k,v] of Object.entries(DB.rankings)){
+    const o=document.createElement('option'); o.value=k; o.textContent=v.label; sr.appendChild(o);
+  }
+  sr.onchange=fillCands; $('#s-cand').onchange=render; $('#s-head').oninput=render;
+  fillCands();
+  $('#status').textContent='✓ Dados carregados.';
+}
+function fillCands(){
+  const sc=$('#s-cand'); sc.innerHTML='';
+  entries().forEach((e,i)=>{ const o=document.createElement('option'); o.value=i;
+    o.textContent=`${e.ballot_name||e.name} (${e.party}-${e.uf})`; sc.appendChild(o); });
+  render();
+}
+const entries=()=>DB.rankings[$('#s-rank').value].entries;
+const cur=()=>entries()[+$('#s-cand').value||0];
+
+function seg(id,cb){ $(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{
+  $(id).querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); cb(b.dataset.v); });}
+seg('#s-fmt',v=>{fmt=v;render()}); seg('#s-theme',v=>{theme=v;render()});
+
+function autoHead(e){
+  const k=$('#s-rank').value;
+  if(k==='top_multiple'||k==='top_increase_pct') return `O patrimônio declarado multiplicou <span class="big">${fmtX(e.multiple)}</span> em 4 anos.`;
+  if(k==='top_decrease_abs') return `O patrimônio declarado encolheu <span class="big">${fmtBRL(Math.abs(e.change_abs))}</span> em 4 anos.`;
+  if(k==='top_assets') return `Declara hoje <span class="big">${fmtBRL(e.a2026)}</span> em bens.`;
+  return `<span class="big">${e.change_abs>=0?'+':'−'}${fmtBRL(Math.abs(e.change_abs))}</span> no patrimônio declarado em 4 anos.`;
+}
+function footer(){
+  return `<div class="footer">
+    <div class="src">Bens declarados pelos próprios candidatos à Justiça Eleitoral (TSE, 2022 → 2026).
+    Variação patrimonial, isoladamente, não indica irregularidade. Metodologia aberta no site.</div>
+    <div class="at">@enriquecimetro</div></div>`;
+}
+function candCard(e){
+  const story=fmt==='story';
+  const headHtml = $('#s-head').value.trim()
+      ? `<span class="big">${$('#s-head').value.trim()}</span>` : autoHead(e);
+  const max=Math.max(e.a2022,e.a2026,1);
+  const w22=Math.max(1.2,e.a2022/max*100), w26=Math.max(1.2,e.a2026/max*100);
+  return `
+  <div class="topbar"></div>
+  <div class="inner">
+    <div class="kicker">Enriquecímetro · Eleições 2026</div>
+    <div class="headline" style="font-size:${story?96:84}px">${headHtml}</div>
+    <div class="bars">
+      <div class="bar-row b2022"><div class="yr">2022</div><div class="track"><div class="fill" style="width:${w22}%"></div></div><div class="val">${fmtBRL(e.a2022)}</div></div>
+      <div class="bar-row b2026"><div class="yr">2026</div><div class="track"><div class="fill" style="width:${w26}%"></div></div><div class="val">${fmtBRL(e.a2026)}</div></div>
+    </div>
+    <div class="who">
+      <img class="cface" src="${PHOTO_BASE}${e.id}.webp" alt="" crossorigin="anonymous" onerror="this.remove()">
+      <div>
+        <div class="name">${e.ballot_name||e.name}</div>
+        <div class="chips">
+          <div class="chip">${e.party} · ${e.uf}</div>
+          <div class="chip">${office(e.office)}</div>
+          <div class="chip">${fmtPct(e.change_pct)}</div>
+          ${e.outlier?'<div class="chip warn">valor atípico — ver metodologia</div>':''}
+        </div>
+      </div>
+    </div>
+  </div>
+  ${footer()}`;
+}
+function top5Card(){
+  const r=DB.rankings[$('#s-rank').value];
+  const rows=r.entries.slice(0,5).map((e,i)=>`
+    <div class="rk-row">
+      <div class="pos">${i+1}º</div>
+      <img class="rface" src="${PHOTO_BASE}${e.id}.webp" alt="" crossorigin="anonymous" onerror="this.style.visibility='hidden'">
+      <div><div class="nm">${e.ballot_name||e.name}</div>
+           <div class="meta">${e.party} · ${e.uf} · ${office(e.office)}${e.outlier?' · valor atípico':''}</div></div>
+      <div class="dv"><div class="v">${fmtBRL(e.a2026)}</div><div class="m">${fmtX(e.multiple)} vs 2022</div></div>
+    </div>`).join('');
+  return `
+  <div class="topbar"></div>
+  <div class="inner">
+    <div class="kicker">Enriquecímetro · Eleições 2026</div>
+    <div class="headline" style="font-size:66px">${r.label}<span style="color:var(--accent)">.</span></div>
+    <div class="sub" style="font-size:28px;margin-top:12px">Patrimônio declarado ao TSE — 2022 → 2026</div>
+    <div class="rk">${rows}</div>
+    <div style="margin-top:auto"></div>
+  </div>
+  ${footer()}`;
+}
+function render(){
+  if(!DB) return;
+  const p=$('#post');
+  p.className='post '+(fmt==='story'?'story':'feed')+(theme==='dark'?' dark':'');
+  p.innerHTML = fmt==='top5' ? top5Card() : candCard(cur());
+  const stageW=$('.stage').clientWidth-60;
+  const s=Math.min(0.62, stageW/1080);
+  $('#scaler').style.transform=`scale(${s})`;
+  $('#scaler').style.height=(fmt==='story'?1920:1080)*s+'px';
+}
+window.addEventListener('resize',render);
+
+$('#btn-dl').onclick=async()=>{
+  const sc=$('#scaler'); const old=sc.style.transform;
+  sc.style.transform='none'; $('#status').textContent='Gerando PNG…';
+  try{
+    const canvas=await html2canvas($('#post'),{scale:1,backgroundColor:null,useCORS:true,windowWidth:1200});
+    const url=canvas.toDataURL('image/png');
+    const e=fmt==='top5'?$('#s-rank').value:(cur().ballot_name||'card').toLowerCase().replace(/\s+/g,'-');
+    // iOS/Safari não respeita o atributo download em data URLs — abre a imagem
+    // em nova aba para salvar com toque longo.
+    if(/iPad|iPhone|iPod/.test(navigator.userAgent)){
+      const w=window.open(); w.document.write(`<img src="${url}" style="max-width:100%">`);
+      $('#status').textContent='✓ Imagem aberta — toque e segure para salvar.';
+    }else{
+      const a=document.createElement('a');
+      a.download=`enriquecimetro-${e}-${fmt}.png`;
+      a.href=url; a.click();
+      $('#status').textContent='✓ PNG baixado.';
+    }
+  }catch(err){ $('#status').textContent='⚠ Erro ao gerar PNG: '+err.message; }
+  sc.style.transform=old;
+};
+load();
+</script>
+</body>
+</html>

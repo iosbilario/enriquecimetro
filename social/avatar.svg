@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <rect width="1080" height="1080" fill="#1f4e79"/>
+  <!-- subtle radial depth -->
+  <radialGradient id="g" cx="50%" cy="42%" r="75%">
+    <stop offset="0%" stop-color="#27598a"/><stop offset="100%" stop-color="#1a4468"/>
+  </radialGradient>
+  <rect width="1080" height="1080" fill="url(#g)"/>
+  <!-- gauge arc: normal zone -->
+  <path d="M 205.2 561.0 A 340 340 0 0 1 749.3 352.1" fill="none" stroke="#faf9f6" stroke-width="30" stroke-linecap="round" opacity="0.92"/>
+  <!-- red zone (terracota, 'no talo') -->
+  <path d="M 749.3 352.1 A 340 340 0 0 1 874.8 561.0" fill="none" stroke="#cf9165" stroke-width="30" stroke-linecap="round"/>
+  <line x1="841.4" y1="566.9" x2="876.8" y2="560.6" stroke="#faf9f6" stroke-width="14" stroke-linecap="round" opacity="1"/><line x1="805.0" y1="467.0" x2="836.2" y2="449.0" stroke="#faf9f6" stroke-width="14" stroke-linecap="round" opacity="1"/><line x1="736.7" y1="385.6" x2="759.8" y2="358.0" stroke="#faf9f6" stroke-width="14" stroke-linecap="round" opacity="1"/><line x1="644.7" y1="332.5" x2="657.0" y2="298.6" stroke="#faf9f6" stroke-width="14" stroke-linecap="round" opacity="1"/><line x1="540.0" y1="314.0" x2="540.0" y2="278.0" stroke="#faf9f6" stroke-width="14" stroke-linecap="round" opacity="1"/><line x1="435.3" y1="332.5" x2="423.0" y2="298.6" stroke="#faf9f6" stroke-width="14" stroke-linecap="round" opacity="1"/><line x1="343.3" y1="385.6" x2="320.2" y2="358.0" stroke="#faf9f6" stroke-width="14" stroke-linecap="round" opacity="1"/><line x1="275.0" y1="467.0" x2="243.8" y2="449.0" stroke="#faf9f6" stroke-width="14" stroke-linecap="round" opacity="1"/><line x1="238.6" y1="566.9" x2="203.2" y2="560.6" stroke="#faf9f6" stroke-width="14" stroke-linecap="round" opacity="1"/>
+  <!-- needle -->
+  <line x1="540" y1="620" x2="764.8" y2="474.0" stroke="#faf9f6" stroke-width="34" stroke-linecap="round"/>
+  <circle cx="540" cy="620" r="58" fill="#faf9f6"/>
+  <circle cx="540" cy="620" r="26" fill="#1f4e79"/>
+  <!-- R$ under pivot -->
+  <text x="540" y="866" text-anchor="middle" font-family="Georgia, serif" font-size="150" font-weight="bold" fill="#faf9f6">R$</text>
+</svg>

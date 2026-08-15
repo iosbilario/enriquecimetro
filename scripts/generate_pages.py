@@ -76,7 +76,7 @@ def page_head(cfg: dict, *, title: str, description: str, path: str,
   <meta property="og:image" content="{esc(og_image)}">
   <meta property="og:locale" content="pt_BR">
   <meta name="twitter:card" content="summary">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="../public/assets/logo.svg">
   <link rel="stylesheet" href="../public/css/style.css">
 {extra_head}</head>"""
 
@@ -85,7 +85,7 @@ HEADER = """<body>
   <a class="skip-link" href="#main">Pular para o conteúdo</a>
   <header class="site-header">
     <div class="wrap">
-      <a class="brand" href="../">Enriquecí<span class="tld">metro</span></a>
+      <a class="brand" href="../"><img src="../public/assets/logo.svg" alt="" width="32" height="32">Enriquecí<span class="tld">metro</span></a>
       <nav class="site-nav" aria-label="Navegação principal">
         <a href="../">Início</a>
         <a href="../methodology.html">Metodologia</a>

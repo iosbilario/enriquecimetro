@@ -75,7 +75,11 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   color: var(--ink);
   text-decoration: none;
   letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
+.brand img { width: 32px; height: 32px; border-radius: 8px; display: block; }
 .brand .tld { color: var(--accent); }
 .site-nav { display: flex; gap: 16px; flex-wrap: wrap; }
 .site-nav a {
@@ -87,6 +91,14 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 /* ---------- hero ---------- */
 .hero { padding: 44px 0 28px; text-align: center; }
+.hero .kicker {
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--ink-faint);
+  margin: 0 0 12px;
+}
 .hero h1 {
   font-family: var(--serif);
   font-size: clamp(2rem, 6vw, 3.2rem);
@@ -254,7 +266,11 @@ h2 {
   padding: 2px 9px;
   letter-spacing: 0.02em;
 }
-.badge.outlier { background: var(--accent-soft); color: var(--accent); }
+/* selo "valor atípico" — sempre terracota (guia de identidade): instrumento, não acusação */
+.badge.outlier { background: #fdf3ec; border: 1px solid #ecd3bd; color: var(--down); }
+@media (prefers-color-scheme: dark) {
+  .badge.outlier { background: #2b2118; border-color: #4a3322; color: var(--down); }
+}
 
 .card .cta {
   margin-top: auto;
