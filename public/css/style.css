@@ -4,8 +4,8 @@
   --bg: #faf9f6;
   --bg-card: #ffffff;
   --ink: #1a1a1a;
-  --ink-soft: #55524c;
-  --ink-faint: #8a867e;
+  --ink-soft: #514e48;
+  --ink-faint: #6b675f; /* ≥4,5:1 sobre --bg (WCAG AA para texto pequeno) */
   --line: #e4e1da;
   --accent: #1f4e79;        /* azul editorial */
   --accent-soft: #eaf1f7;
@@ -23,7 +23,7 @@
     --bg-card: #1c1f25;
     --ink: #eceae5;
     --ink-soft: #b3afa7;
-    --ink-faint: #7d7a73;
+    --ink-faint: #98948c; /* ≥4,5:1 sobre --bg escuro */
     --line: #2b2f36;
     --accent: #7aa9d4;
     --accent-soft: #1e2836;

@@ -13,6 +13,7 @@ import sys
 import time
 
 import download
+import generate_pages
 import generate_site_data
 import match_candidates
 import transform
@@ -64,7 +65,11 @@ def main(argv: list[str]) -> int:
     rc = validate.main([])
     if rc != 0:
         return rc
-    return publish(config)
+    rc = publish(config)
+    if rc != 0:
+        return rc
+    # Pré-renderização de páginas estáticas (SEO/GEO) a partir dos dados publicados.
+    return generate_pages.main()
 
 
 if __name__ == "__main__":

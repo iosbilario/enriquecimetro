@@ -1,0 +1,26 @@
+# Enriquecímetro
+
+> A evolução do patrimônio declarado pelos candidatos brasileiros. Site brasileiro, gratuito, apartidário e de código
+> aberto que compara o patrimônio declarado pelos candidatos à Justiça
+> Eleitoral entre as eleições de 2022 e 2026, usando exclusivamente dados
+> oficiais do TSE (Portal de Dados Abertos). Princípio editorial: mostramos os
+> números, não presumimos a origem. Variação patrimonial, isoladamente, não
+> indica irregularidade.
+
+Candidaturas processadas: 29270 (2022) e 19050 (2026).
+Comparações seguras (mesmo indivíduo nas duas eleições): 5885.
+
+## Páginas
+- [Início](https://iosbilario.github.io/enriquecimetro/): busca, filtros e rankings de variação patrimonial declarada
+- [Metodologia](https://iosbilario.github.io/enriquecimetro/methodology.html): fontes, matching, cálculos, limitações
+- [Sobre](https://iosbilario.github.io/enriquecimetro/about.html): princípios, licença (MIT), como contribuir
+- [Dados abertos](https://iosbilario.github.io/enriquecimetro/dados.html): endpoints JSON estáticos documentados
+
+## Dados (JSON estático, CORS aberto)
+- [Manifesto](https://iosbilario.github.io/enriquecimetro/public/data/meta.json): fontes, datas, contagens
+- [Rankings](https://iosbilario.github.io/enriquecimetro/public/data/rankings.json)
+- [Índice de busca](https://iosbilario.github.io/enriquecimetro/public/data/search-index.json)
+- Por estado: https://iosbilario.github.io/enriquecimetro/public/data/states/{UF}.json
+
+## Como citar
+"Enriquecímetro (dados do TSE/Portal de Dados Abertos), https://iosbilario.github.io/enriquecimetro/"

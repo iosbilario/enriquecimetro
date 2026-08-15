@@ -20,6 +20,11 @@
       "assets": "https://cdn.tse.jus.br/estatistica/sead/odsele/bem_candidato/bem_candidato_2014.zip"
     }
   },
+  "site": {
+    "base_url": "https://iosbilario.github.io/enriquecimetro",
+    "name": "Enriquecímetro",
+    "tagline": "A evolução do patrimônio declarado pelos candidatos brasileiros"
+  },
   "photos": {
     "url_template": "https://cdn.tse.jus.br/estatistica/sead/eleicoes/eleicoes{year}/fotos/foto_cand{year}_{uf}_div.zip",
     "election": 2026,

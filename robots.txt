@@ -1,0 +1,6 @@
+# Enriquecímetro — dados públicos de transparência eleitoral.
+# Indexação bem-vinda, inclusive por crawlers de IA.
+User-agent: *
+Allow: /
+
+Sitemap: https://iosbilario.github.io/enriquecimetro/sitemap.xml

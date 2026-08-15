@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dados abertos | Enriquecímetro</title>
+  <meta name="description" content="Os dados do Enriquecímetro são JSONs estáticos públicos, com CORS aberto. Documentação dos endpoints: manifesto, rankings, índice de busca, estados e candidatos.">
+  <link rel="canonical" href="https://iosbilario.github.io/enriquecimetro/dados.html">
+  <meta property="og:title" content="Dados abertos | Enriquecímetro">
+  <meta property="og:description" content="JSONs estáticos públicos do Enriquecímetro, documentados — use em reportagens, pesquisas e aplicações.">
+  <meta property="og:locale" content="pt_BR">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="stylesheet" href="public/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Pular para o conteúdo</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="./">Enriquecí<span class="tld">metro</span></a>
+      <nav class="site-nav" aria-label="Navegação principal">
+        <a href="./">Início</a>
+        <a href="methodology.html">Metodologia</a>
+        <a href="about.html">Sobre</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap prose">
+    <h1 style="font-family:var(--serif);margin-top:34px">Dados abertos</h1>
+    <p>Todo o conteúdo do Enriquecímetro é servido como <strong>JSON estático</strong> em URLs
+      públicas e estáveis, com CORS aberto — na prática, uma API somente-leitura sem chave e sem
+      limite além do bom senso. Use livremente em reportagens, pesquisas e aplicações, citando a
+      fonte primária (TSE) e este projeto.</p>
+
+    <h2>Endpoints</h2>
+    <ul>
+      <li><a href="public/data/meta.json"><code>public/data/meta.json</code></a> — manifesto:
+        fontes oficiais utilizadas, datas de download e processamento, contagens, metodologia do
+        indicador de outlier e opções de filtro.</li>
+      <li><a href="public/data/rankings.json"><code>public/data/rankings.json</code></a> — top 100
+        por categoria (aumento nominal, percentual, patrimônio atual, redução, multiplicador).
+        Somente candidaturas com correspondência exata entre eleições.</li>
+      <li><a href="public/data/search-index.json"><code>public/data/search-index.json</code></a> —
+        índice compacto de todas as candidaturas (formato colunar: chave <code>fields</code> +
+        linhas em <code>items</code>).</li>
+      <li><code>public/data/states/{UF}.json</code> — mesmo formato do índice, por estado
+        (ex.: <a href="public/data/states/SP.json">SP</a>).</li>
+      <li><code>public/data/candidates/{xy}.json</code> — detalhes completos (bens item a item),
+        em 256 shards pelos 2 primeiros caracteres do id do candidato.</li>
+      <li><a href="public/photos/manifest.json"><code>public/photos/manifest.json</code></a> —
+        manifesto das fotos oficiais de urna (miniaturas em <code>public/photos/{id}.webp</code>).</li>
+    </ul>
+
+    <h2>Garantias e limitações</h2>
+    <ul>
+      <li>Os dados são regenerados diariamente a partir do TSE; <code>meta.json</code> traz o
+        carimbo de tempo de cada processamento.</li>
+      <li>Nenhum arquivo contém CPF, e-mail, título de eleitor ou endereço — uma validação
+        automática bloqueia a publicação se detectar dados pessoais.</li>
+      <li>Valores são os <em>declarados</em> à Justiça Eleitoral, nominais, sem correção
+        monetária.</li>
+      <li>O identificador do candidato é estável entre atualizações (derivado do número sequencial
+        público de candidatura do TSE).</li>
+    </ul>
+
+    <h2>Como citar</h2>
+    <blockquote>Enriquecímetro — variação patrimonial declarada por candidatos (dados do
+      TSE/Portal de Dados Abertos). Disponível em
+      https://iosbilario.github.io/enriquecimetro/</blockquote>
+    <p>Para reproduzir do zero, o pipeline completo está no
+      <a href="https://github.com/iosbilario/enriquecimetro" rel="noopener">repositório</a> (MIT).</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p class="disclaimer">Uma variação patrimonial elevada, por si só, não representa evidência de
+        irregularidade. Os valores exibidos correspondem às declarações apresentadas à Justiça Eleitoral.</p>
+      <nav aria-label="Rodapé">
+        <a href="about.html">Sobre</a>
+        <a href="methodology.html">Metodologia</a>
+        <a href="dados.html">Dados</a>
+        <a href="https://github.com/iosbilario/enriquecimetro" rel="noopener">GitHub</a>
+      </nav>
+      <p>Projeto independente, apartidário e sem fins lucrativos. Sem vínculo com o TSE.</p>
+    </div>
+  </footer>
+</body>
+</html>

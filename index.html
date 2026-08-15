@@ -5,12 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Enriquecímetro — a evolução do patrimônio declarado pelos candidatos brasileiros</title>
   <meta name="description" content="Como mudou o patrimônio declarado pelos candidatos brasileiros à Justiça Eleitoral entre as eleições de 2022 e 2026. Dados oficiais do TSE, metodologia aberta.">
-  <link rel="canonical" href="./">
+  <link rel="canonical" href="https://iosbilario.github.io/enriquecimetro/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Enriquecímetro">
   <meta property="og:description" content="A evolução do patrimônio declarado pelos candidatos brasileiros. Mostramos os números. Não presumimos a origem.">
+  <meta property="og:url" content="https://iosbilario.github.io/enriquecimetro/">
+  <meta property="og:image" content="https://iosbilario.github.io/enriquecimetro/public/assets/og.png">
   <meta property="og:locale" content="pt_BR">
-  <meta name="twitter:card" content="summary">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "name": "Enriquecímetro",
+        "url": "https://iosbilario.github.io/enriquecimetro/",
+        "description": "A evolução do patrimônio declarado pelos candidatos brasileiros, com dados oficiais do TSE.",
+        "inLanguage": "pt-BR"
+      },
+      {
+        "@type": "Dataset",
+        "name": "Variação patrimonial declarada — candidatos 2022/2026",
+        "description": "Totais de bens declarados à Justiça Eleitoral por candidatos brasileiros nas eleições de 2022 e 2026, com variação nominal e percentual. Derivado dos datasets consulta_cand e bem_candidato do TSE.",
+        "url": "https://iosbilario.github.io/enriquecimetro/dados.html",
+        "isBasedOn": "https://dadosabertos.tse.jus.br/",
+        "creator": {"@type": "Organization", "name": "Enriquecímetro"},
+        "license": "https://github.com/iosbilario/enriquecimetro/blob/main/LICENSE",
+        "distribution": [
+          {"@type": "DataDownload", "encodingFormat": "application/json",
+           "contentUrl": "https://iosbilario.github.io/enriquecimetro/public/data/rankings.json"},
+          {"@type": "DataDownload", "encodingFormat": "application/json",
+           "contentUrl": "https://iosbilario.github.io/enriquecimetro/public/data/search-index.json"}
+        ]
+      }
+    ]
+  }
+  </script>
   <meta name="twitter:title" content="Enriquecímetro">
   <meta name="twitter:description" content="A evolução do patrimônio declarado pelos candidatos brasileiros, com dados oficiais do TSE.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
@@ -81,7 +112,274 @@
         Uma variação patrimonial, isoladamente, não indica irregularidade.</p>
 
       <p class="status-line" id="result-status" role="status" aria-live="polite"></p>
-      <ul class="cards" id="results" aria-busy="true"></ul>
+      <ul class="cards" id="results">
+        <!-- ssr:rankings:start -->
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Lúcia Viana</h3>
+    <p class="meta">PSOL · TO · Vice-governador</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 1.282.693,67</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 2.075.000.000,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 2.073.717.306,33</span><span class="pct">+161.668,9%</span></div>
+  <a class="cta" href="c/032a0349933b.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Dra. Georgia Micheletti</h3>
+    <p class="meta">PSDB · AC · Deputado Estadual</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 3.650.000,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 1.226.983.360,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 1.223.333.360,00</span><span class="pct">+33.516,0%</span></div>
+  <a class="cta" href="c/0e548ceb9f24.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Juíz Ramon Moreira</h3>
+    <p class="meta">DC · MG · Senador</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 13.481.928,48</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 939.671.838,80</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 926.189.910,32</span><span class="pct">+6.869,9%</span></div>
+  <a class="cta" href="c/0dc23afea7a4.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Adauto Souto</h3>
+    <p class="meta">PDT · MS · Deputado Federal</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 284.000,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 804.500.000,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 804.216.000,00</span><span class="pct">+283.174,7%</span></div>
+  <a class="cta" href="c/9cc9df6b4bb0.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">André Silva</h3>
+    <p class="meta">MDB · AL · Deputado Estadual</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 251.200,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 548.600.000,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 548.348.800,00</span><span class="pct">+218.291,7%</span></div>
+  <a class="cta" href="c/d8d763abd23e.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Misael Varella</h3>
+    <p class="meta">PSD · MG · 1º Suplente</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 43.067.558,70</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 315.201.070,12</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 272.133.511,42</span><span class="pct">+631,9%</span></div>
+  <a class="cta" href="c/f7e0a82b1980.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Pastore</h3>
+    <p class="meta">PL · TO · 1º Suplente</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 453.595.515,70</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 677.740.390,27</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 224.144.874,57</span><span class="pct">+49,4%</span></div>
+  <a class="cta" href="c/ded72e4b0a3c.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Lunelli</h3>
+    <p class="meta">MDB · SC · Senador</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 390.033.568,89</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 613.221.297,87</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 223.187.728,98</span><span class="pct">+57,2%</span></div>
+  <a class="cta" href="c/379c867811da.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Anderson Correia</h3>
+    <p class="meta">PP · PE · Deputado Estadual</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 55.000,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 200.000.056,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 199.945.056,00</span><span class="pct">+363.536,5%</span></div>
+  <a class="cta" href="c/cdaada7770ff.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Otaviano Pivetta</h3>
+    <p class="meta">REPUBLICANOS · MT · Governador</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 378.869.597,56</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 575.680.870,95</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 196.811.273,39</span><span class="pct">+52,0%</span></div>
+  <a class="cta" href="c/55d69738313a.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Agopin.com</h3>
+    <p class="meta">MDB · CE · Deputado Estadual</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 117.000,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 140.000.000,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 139.883.000,00</span><span class="pct">+119.558,1%</span></div>
+  <a class="cta" href="c/307f964b0dac.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">José Everaldo</h3>
+    <p class="meta">PSB · RJ · Deputado Estadual</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 0,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 120.302.000,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 120.302.000,00</span></div>
+  <a class="cta" href="c/fb24f90139e3.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Ivanilson Marinho</h3>
+    <p class="meta">UNIÃO · TO · Deputado Estadual</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 700.000,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 120.271.053,57</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 119.571.053,57</span><span class="pct">+17.081,6%</span></div>
+  <a class="cta" href="c/c89f6dabe242.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Professora Maria do Carmo</h3>
+    <p class="meta">PL · AM · Governador</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 14.775.247,76</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 118.473.769,48</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 103.698.521,72</span><span class="pct">+701,8%</span></div>
+  <a class="cta" href="c/0d98cbcb6316.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Liliane Abreu</h3>
+    <p class="meta">PV · AP · Deputado Estadual</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 97.500,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 97.500.000,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 97.402.500,00</span><span class="pct">+99.900,0%</span></div>
+  <a class="cta" href="c/640524bfcc31.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Capitã Rebeca</h3>
+    <p class="meta">REPUBLICANOS · PB · Deputado Federal</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 37.000,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 95.000.000,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 94.963.000,00</span><span class="pct">+256.656,8%</span></div>
+  <a class="cta" href="c/cc04cdc19563.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Professora Caterine</h3>
+    <p class="meta">PODE · SC · Deputado Estadual</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 89.000,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 93.700.000,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 93.611.000,00</span><span class="pct">+105.180,9%</span></div>
+  <a class="cta" href="c/29281028b144.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Edimar Ferreira</h3>
+    <p class="meta">PDT · MG · Deputado Estadual</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 0,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 90.000.000,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 90.000.000,00</span></div>
+  <a class="cta" href="c/6eb4f0919260.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Felipe Cecílio</h3>
+    <p class="meta">PSDB · GO · Deputado Federal</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 20.000,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 86.829.450,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 86.809.450,00</span><span class="pct">+434.047,2%</span></div>
+  <a class="cta" href="c/80a074a9f537.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Silvio de Sousa</h3>
+    <p class="meta">PSOL · TO · Deputado Estadual</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 18.000,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 84.500.000,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 84.482.000,00</span><span class="pct">+469.344,4%</span></div>
+  <a class="cta" href="c/52b6d9e065ce.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Dra Cássia Saldanha</h3>
+    <p class="meta">MDB · CE · Deputado Estadual</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 30.000,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 70.000.000,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 69.970.000,00</span><span class="pct">+233.233,3%</span></div>
+  <a class="cta" href="c/7528803cec17.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Adriano Coelho</h3>
+    <p class="meta">MDB · PA · Deputado Federal</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 7.307.631,16</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 71.216.159,16</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 63.908.528,00</span><span class="pct">+874,5%</span></div>
+  <a class="cta" href="c/2190757b2bb1.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Dr. Edson da Paiol</h3>
+    <p class="meta">PODE · SP · Deputado Estadual</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 226.070,00</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 51.000.000,00</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 50.773.930,00</span><span class="pct">+22.459,4%</span></div>
+  <a class="cta" href="c/826eee980bc3.html">Ver evolução patrimonial</a>
+</li>
+<li class="card">
+  <div class="who"><div class="who-text">
+    <h3 class="name">Zema</h3>
+    <p class="meta">NOVO · BR · Presidente</p>
+  </div></div>
+  <div class="flow"><div class="col"><div class="yr">2022</div><div class="val">R$ 129.795.313,70</div></div>
+  <span class="arrow" aria-hidden="true">→</span>
+  <div class="col"><div class="yr">2026</div><div class="val">R$ 178.707.610,09</div></div></div>
+  <div class="delta up"><span class="abs">▲ R$ 48.912.296,39</span><span class="pct">+37,7%</span></div>
+  <a class="cta" href="c/5da3ccaa1c5f.html">Ver evolução patrimonial</a>
+</li>
+<!-- ssr:rankings:end -->
+      </ul>
       <p class="empty" id="empty" hidden>Nenhuma candidatura encontrada com esses critérios.</p>
       <div class="more-row" id="more" hidden>
         <button id="more-btn" type="button">Mostrar mais</button>
@@ -97,6 +395,7 @@
         <a href="about.html">Sobre</a>
         <a href="methodology.html">Metodologia</a>
         <a href="methodology.html#fontes">Fontes</a>
+        <a href="dados.html">Dados</a>
         <a href="https://github.com/iosbilario/enriquecimetro" id="gh-link" rel="noopener">GitHub</a>
         <a href="about.html#licenca">Licença</a>
       </nav>

@@ -137,7 +137,12 @@
         : item.status && item.status !== "exact" && hasBoth
           ? el("span", { class: "badge" }, "correspondência provável")
           : null,
-      el("a", { class: "cta", href: `candidate.html?id=${item.id}` }, "Ver evolução patrimonial")
+      el("a", {
+        class: "cta",
+        // candidatos com comparação têm página estática pré-renderizada (SEO);
+        // os demais usam a rota interativa
+        href: hasBoth ? `c/${item.id}.html` : `candidate.html?id=${item.id}`,
+      }, "Ver evolução patrimonial")
     );
   }
 
