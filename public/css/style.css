@@ -355,6 +355,10 @@ h2 {
   margin: 0 0 14px;
 }
 .site-footer nav { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; }
+.site-footer .seal { float: right; margin: 0 0 12px 18px; }
+.site-footer .seal img { display: block; width: 104px; height: 104px; }
+@media (max-width: 560px) { .site-footer .seal { float: none; margin: 0 0 14px; } }
+.seal-feature { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
 .site-footer a { color: var(--ink-soft); }
 
 .skip-link {

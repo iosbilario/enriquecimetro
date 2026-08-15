@@ -95,9 +95,17 @@ HEADER = """<body>
   </header>
   <main id="main" class="wrap">"""
 
+SEAL = ('<a class="seal" href="https://carimbo.tec.br/v/3493811489d0e38dc4fa4546a1bbcd72" '
+        'title="Ver o recibo público desta auditoria" rel="noopener">'
+        '<img src="https://carimbo.tec.br/api/selo/3493811489d0e38dc4fa4546a1bbcd72.svg'
+        '?template=circulo&amp;tema=escuro" '
+        'alt="Carimbo de auditoria técnica independente — clique para ler o recibo público" '
+        'width="104" height="104" loading="lazy" style="border:0"></a>')
+
 FOOTER = f"""  </main>
   <footer class="site-footer">
     <div class="wrap">
+      {SEAL}
       <p class="disclaimer">{DISCLAIMER}</p>
       <nav aria-label="Rodapé">
         <a href="../about.html">Sobre</a>
