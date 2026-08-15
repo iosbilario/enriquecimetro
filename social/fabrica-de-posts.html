@@ -333,19 +333,31 @@ $('#btn-dl').onclick=async()=>{
   sc.style.transform='none'; $('#status').textContent='Gerando PNG…';
   try{
     const canvas=await html2canvas($('#post'),{scale:1,backgroundColor:null,useCORS:true,windowWidth:1200});
-    const url=canvas.toDataURL('image/png');
-    const e=fmt==='top5'?$('#s-rank').value:(cur().ballot_name||'card').toLowerCase().replace(/\s+/g,'-');
-    // iOS/Safari não respeita o atributo download em data URLs — abre a imagem
-    // em nova aba para salvar com toque longo.
-    if(/iPad|iPhone|iPod/.test(navigator.userAgent)){
-      const w=window.open(); w.document.write(`<img src="${url}" style="max-width:100%">`);
-      $('#status').textContent='✓ Imagem aberta — toque e segure para salvar.';
-    }else{
-      const a=document.createElement('a');
-      a.download=`enriquecimetro-${e}-${fmt}.png`;
-      a.href=url; a.click();
-      $('#status').textContent='✓ PNG baixado.';
+    const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
+    if(!blob) throw new Error('canvas vazio');
+    const e=fmt==='top5'?$('#s-rank').value:(cur().ballot_name||'card').toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,'-');
+    const fname=`enriquecimetro-${e}-${fmt}.png`;
+    const file=new File([blob],fname,{type:'image/png'});
+    const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    // No celular, a folha nativa de compartilhar é o caminho confiável
+    // (salvar em Fotos, WhatsApp, Instagram). data:/window.open falham no iOS.
+    if(mobile && navigator.canShare && navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({files:[file]});
+        $('#status').textContent='✓ Card compartilhado/salvo.';
+        sc.style.transform=old; return;
+      }catch(err){
+        if(err.name==='AbortError'){ $('#status').textContent='Compartilhamento cancelado.'; sc.style.transform=old; return; }
+        // NotAllowedError etc. → cai para o download por blob
+      }
     }
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.download=fname; a.href=url;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+    $('#status').textContent='✓ PNG baixado.';
   }catch(err){ $('#status').textContent='⚠ Erro ao gerar PNG: '+err.message; }
   sc.style.transform=old;
 };
