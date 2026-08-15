@@ -113,34 +113,58 @@
 </header>
 <div class="app">
   <aside class="panel">
-    <label>Ranking</label>
-    <select id="s-rank"></select>
-    <label>Candidato</label>
-    <select id="s-cand"></select>
+    <label for="q">Buscar candidato</label>
+    <input type="search" id="q" placeholder="Nome, nome de urna ou partido" autocomplete="off">
+    <div class="row">
+      <div style="flex:1"><label for="f-uf">Estado</label>
+        <select id="f-uf"><option value="">Todos</option></select></div>
+      <div style="flex:1"><label for="f-office">Cargo</label>
+        <select id="f-office"><option value="">Todos</option></select></div>
+    </div>
+    <div class="row">
+      <div style="flex:1"><label for="f-party">Partido</label>
+        <select id="f-party"><option value="">Todos</option></select></div>
+      <div style="flex:1"><label for="f-sort">Ordenar por</label>
+        <select id="f-sort">
+          <option value="abs">Maior aumento (R$)</option>
+          <option value="pct">Maior aumento (%)</option>
+          <option value="mult">Maior multiplicador</option>
+          <option value="assets">Maior patrimônio 2026</option>
+          <option value="dec">Maior redução (R$)</option>
+          <option value="name">Nome (A–Z)</option>
+        </select></div>
+    </div>
+    <label for="s-cand">Candidato <span id="count" style="font-weight:400;color:var(--ink-faint)"></span></label>
+    <select id="s-cand" size="7"></select>
     <label>Formato</label>
     <div class="seg" id="s-fmt">
       <button data-v="feed" class="on">Feed 1:1</button>
       <button data-v="story">Story 9:16</button>
       <button data-v="top5">Top 5</button>
     </div>
+    <div id="rank-wrap" hidden>
+      <label for="s-rank">Ranking do Top 5</label>
+      <select id="s-rank"></select>
+    </div>
     <label>Tema</label>
     <div class="seg" id="s-theme">
       <button data-v="light" class="on">Claro</button>
       <button data-v="dark">Escuro</button>
     </div>
-    <label>Manchete (opcional — deixe vazio para automática)</label>
+    <label for="s-head">Manchete (opcional — deixe vazio para automática)</label>
     <input type="text" id="s-head" placeholder="Ex.: O ponteiro estourou.">
     <button class="go" id="btn-dl">⬇ Baixar PNG</button>
     <p id="status">Carregando dados…</p>
-    <p class="hint">Os valores vêm de <code>rankings.json</code> (bens declarados ao TSE). Cards de candidatos marcados como <b>valor atípico</b> ganham um selo automático — mantenha, é o que protege a credibilidade do perfil.</p>
+    <p class="hint">Somente candidaturas com correspondência segura entre 2022 e 2026 (bens declarados ao TSE). Cards de candidatos marcados como <b>valor atípico</b> ganham um selo automático — mantenha, é o que protege a credibilidade do perfil.</p>
   </aside>
   <div class="stage"><div id="scaler"><div id="post" class="post feed"></div></div></div>
 </div>
 <script>
-const DATA_URLS = ['../public/data/rankings.json','https://iosbilario.github.io/enriquecimetro/public/data/rankings.json'];
+const BASES = ['..','https://iosbilario.github.io/enriquecimetro'];
 let PHOTO_BASE = '../public/photos/';
-let DB=null, fmt='feed', theme='light';
+let DB=null, ALL=[], VIEW=[], fmt='feed', theme='light';
 const $=s=>document.querySelector(s);
+const norm = s => (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase();
 
 const fmtBRL = v => {
   const a=Math.abs(v);
@@ -155,39 +179,84 @@ const cap = s => s.toLowerCase().replace(/(^|\s|-)\p{L}/gu, c=>c.toUpperCase());
 const office = o => cap(o).replace('Vice-governador','Vice-Governador(a)');
 
 async function load(){
-  for(const u of DATA_URLS){
-    try{ const r=await fetch(u); if(r.ok){ DB=await r.json();
-      if(u.startsWith('http')) PHOTO_BASE='https://iosbilario.github.io/enriquecimetro/public/photos/';
-      break; } }catch(e){}
+  for(const base of BASES){
+    try{
+      const [r1,r2]=await Promise.all([
+        fetch(base+'/public/data/rankings.json'),
+        fetch(base+'/public/data/search-index.json')]);
+      if(r1.ok && r2.ok){
+        DB=await r1.json();
+        const idx=await r2.json();
+        const f={}; idx.fields.forEach((n,i)=>f[n]=i);
+        ALL=idx.items
+          .filter(row=>row[f.a2022]!==null && row[f.a2026]!==null)
+          .map(row=>({ id:row[f.id], name:row[f.name], ballot_name:row[f.ballot_name],
+            party:row[f.party], uf:row[f.uf], office:row[f.office],
+            a2022:row[f.a2022], a2026:row[f.a2026],
+            change_abs:row[f.change_abs], change_pct:row[f.change_pct],
+            multiple:row[f.a2022]>0 ? row[f.a2026]/row[f.a2022] : null,
+            outlier:row[f.outlier],
+            hay:norm(row[f.name]+' '+row[f.ballot_name]+' '+row[f.party]) }));
+        if(base.startsWith('http')) PHOTO_BASE=base+'/public/photos/';
+        break;
+      }
+    }catch(e){}
   }
-  if(!DB){ $('#status').textContent='⚠ Não consegui carregar rankings.json (abra este arquivo dentro da pasta do site ou verifique a conexão).'; return; }
+  if(!DB||!ALL.length){ $('#status').textContent='⚠ Não consegui carregar os dados (verifique a conexão).'; return; }
+
   const sr=$('#s-rank');
   for(const [k,v] of Object.entries(DB.rankings)){
     const o=document.createElement('option'); o.value=k; o.textContent=v.label; sr.appendChild(o);
   }
-  sr.onchange=fillCands; $('#s-cand').onchange=render; $('#s-head').oninput=render;
+  // filtros a partir do catálogo completo, sempre ordenados
+  const fill=(sel,vals)=>{ const n=$(sel);
+    [...new Set(vals.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'))
+      .forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; n.appendChild(o); }); };
+  fill('#f-uf', ALL.map(e=>e.uf));
+  fill('#f-office', ALL.map(e=>cap(e.office)));
+  fill('#f-party', ALL.map(e=>e.party));
+
+  let t; $('#q').oninput=()=>{ clearTimeout(t); t=setTimeout(fillCands,180); };
+  ['#f-uf','#f-office','#f-party','#f-sort'].forEach(s=>$(s).onchange=fillCands);
+  sr.onchange=render; $('#s-cand').onchange=render; $('#s-head').oninput=render;
   fillCands();
-  $('#status').textContent='✓ Dados carregados.';
+  $('#status').textContent='✓ '+ALL.length.toLocaleString('pt-BR')+' candidatos comparáveis carregados.';
 }
+const SORTS={
+  abs:(a,b)=>(b.change_abs??-1e18)-(a.change_abs??-1e18),
+  pct:(a,b)=>(b.change_pct??-1e18)-(a.change_pct??-1e18),
+  mult:(a,b)=>(b.multiple??-1e18)-(a.multiple??-1e18),
+  assets:(a,b)=>(b.a2026??-1e18)-(a.a2026??-1e18),
+  dec:(a,b)=>(a.change_abs??1e18)-(b.change_abs??1e18),
+  name:(a,b)=>(a.ballot_name||a.name).localeCompare(b.ballot_name||b.name,'pt-BR'),
+};
 function fillCands(){
+  const q=norm($('#q').value), uf=$('#f-uf').value, of=$('#f-office').value, pt=$('#f-party').value;
+  VIEW=ALL.filter(e=>
+    (!uf||e.uf===uf) && (!of||cap(e.office)===of) && (!pt||e.party===pt) && (!q||e.hay.includes(q)));
+  VIEW.sort(SORTS[$('#f-sort').value]||SORTS.abs);
   const sc=$('#s-cand'); sc.innerHTML='';
-  entries().forEach((e,i)=>{ const o=document.createElement('option'); o.value=i;
-    o.textContent=`${e.ballot_name||e.name} (${e.party}-${e.uf})`; sc.appendChild(o); });
+  const LIMIT=300;
+  VIEW.slice(0,LIMIT).forEach((e,i)=>{ const o=document.createElement('option'); o.value=i;
+    o.textContent=`${cap(e.ballot_name||e.name)} (${e.party}-${e.uf})`; sc.appendChild(o); });
+  sc.selectedIndex=0;
+  $('#count').textContent=VIEW.length
+    ? `— ${VIEW.length.toLocaleString('pt-BR')} encontrado(s)${VIEW.length>LIMIT?`, exibindo ${LIMIT}`:''}`
+    : '— nenhum encontrado';
   render();
 }
-const entries=()=>DB.rankings[$('#s-rank').value].entries;
-const cur=()=>entries()[+$('#s-cand').value||0];
+const cur=()=>VIEW[+$('#s-cand').value||0];
 
 function seg(id,cb){ $(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{
   $(id).querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); cb(b.dataset.v); });}
-seg('#s-fmt',v=>{fmt=v;render()}); seg('#s-theme',v=>{theme=v;render()});
+seg('#s-fmt',v=>{fmt=v;$('#rank-wrap').hidden=(v!=='top5');render()});
+seg('#s-theme',v=>{theme=v;render()});
 
 function autoHead(e){
-  const k=$('#s-rank').value;
-  if(k==='top_multiple'||k==='top_increase_pct') return `O patrimônio declarado multiplicou <span class="big">${fmtX(e.multiple)}</span> em 4 anos.`;
-  if(k==='top_decrease_abs') return `O patrimônio declarado encolheu <span class="big">${fmtBRL(Math.abs(e.change_abs))}</span> em 4 anos.`;
-  if(k==='top_assets') return `Declara hoje <span class="big">${fmtBRL(e.a2026)}</span> em bens.`;
-  return `<span class="big">${e.change_abs>=0?'+':'−'}${fmtBRL(Math.abs(e.change_abs))}</span> no patrimônio declarado em 4 anos.`;
+  // manchete escolhida pelo dado mais expressivo do próprio candidato
+  if(e.change_abs<0) return `O patrimônio declarado encolheu <span class="big">${fmtBRL(Math.abs(e.change_abs))}</span> em 4 anos.`;
+  if(e.multiple && e.multiple>=3) return `O patrimônio declarado multiplicou <span class="big">${fmtX(e.multiple)}</span> em 4 anos.`;
+  return `<span class="big">+${fmtBRL(Math.abs(e.change_abs))}</span> no patrimônio declarado em 4 anos.`;
 }
 function footer(){
   return `<div class="footer">
@@ -213,11 +282,11 @@ function candCard(e){
     <div class="who">
       <img class="cface" src="${PHOTO_BASE}${e.id}.webp" alt="" crossorigin="anonymous" onerror="this.remove()">
       <div>
-        <div class="name">${e.ballot_name||e.name}</div>
+        <div class="name">${cap(e.ballot_name||e.name)}</div>
         <div class="chips">
           <div class="chip">${e.party} · ${e.uf}</div>
           <div class="chip">${office(e.office)}</div>
-          <div class="chip">${fmtPct(e.change_pct)}</div>
+          ${e.change_pct!=null?`<div class="chip">${fmtPct(e.change_pct)}</div>`:'<div class="chip">patrimônio anterior: R$ 0</div>'}
           ${e.outlier?'<div class="chip warn">valor atípico — ver metodologia</div>':''}
         </div>
       </div>
@@ -231,7 +300,7 @@ function top5Card(){
     <div class="rk-row">
       <div class="pos">${i+1}º</div>
       <img class="rface" src="${PHOTO_BASE}${e.id}.webp" alt="" crossorigin="anonymous" onerror="this.style.visibility='hidden'">
-      <div><div class="nm">${e.ballot_name||e.name}</div>
+      <div><div class="nm">${cap(e.ballot_name||e.name)}</div>
            <div class="meta">${e.party} · ${e.uf} · ${office(e.office)}${e.outlier?' · valor atípico':''}</div></div>
       <div class="dv"><div class="v">${fmtBRL(e.a2026)}</div><div class="m">${fmtX(e.multiple)} vs 2022</div></div>
     </div>`).join('');
@@ -250,6 +319,7 @@ function render(){
   if(!DB) return;
   const p=$('#post');
   p.className='post '+(fmt==='story'?'story':'feed')+(theme==='dark'?' dark':'');
+  if(fmt!=='top5' && !cur()){ p.innerHTML=''; return; }
   p.innerHTML = fmt==='top5' ? top5Card() : candCard(cur());
   const stageW=$('.stage').clientWidth-60;
   const s=Math.min(0.62, stageW/1080);
