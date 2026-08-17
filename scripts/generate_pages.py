@@ -234,7 +234,10 @@ def candidate_page(cfg: dict, detail: dict, meta: dict) -> str:
         </div>
       </div>
       {status_note}
-      <p><a href="../candidate.html?id={detail['id']}">Ver versão interativa com gráfico →</a></p>
+      <p class="actions">
+        <a href="../candidate.html?id={detail['id']}">Ver versão interativa com gráfico →</a>
+        <a class="btn-share" href="../social/fabrica-de-posts.html?id={detail['id']}">Gerar post deste candidato</a>
+      </p>
     </section>
 
     {asset_list_html(y0, e0)}

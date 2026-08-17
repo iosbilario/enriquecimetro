@@ -20,6 +20,12 @@
       "assets": "https://cdn.tse.jus.br/estatistica/sead/odsele/bem_candidato/bem_candidato_2014.zip"
     }
   },
+  "reference_values": {
+    "salario_minimo": {
+      "2026": 1621.00,
+      "note": "Salário mínimo nacional vigente em 2026 (Decreto federal). Usado apenas como comparação de escala na Fábrica de Posts; atualize aqui se houver reajuste."
+    }
+  },
   "site": {
     "base_url": "https://iosbilario.github.io/enriquecimetro",
     "name": "Enriquecímetro",

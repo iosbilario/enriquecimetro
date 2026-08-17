@@ -32,6 +32,10 @@
   .seg button.on{background:var(--accent);color:#fff}
   .go{margin-top:22px;width:100%;padding:13px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-size:1rem;font-weight:700;cursor:pointer}
   .go:hover{filter:brightness(1.1)}
+  .go.alt{margin-top:0;padding:10px;font-size:.88rem;background:var(--accent-soft);color:var(--accent);border:1.5px solid var(--line)}
+  .panel textarea{width:100%;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);font-size:.82rem;color:var(--ink);font-family:var(--sans);line-height:1.4;resize:vertical}
+  .post .scale{color:var(--ink-faint);font-size:26px;margin-top:14px}
+  .post.dark .scale{color:#98948c}
   .hint{font-size:.75rem;color:var(--ink-faint);margin-top:10px;line-height:1.45}
   #status{font-size:.8rem;margin-top:10px;color:var(--accent)}
   .stage{display:flex;align-items:flex-start;justify-content:center;padding:30px;overflow:auto}
@@ -159,6 +163,12 @@
     <label for="s-head">Manchete (opcional — deixe vazio para automática)</label>
     <input type="text" id="s-head" placeholder="Ex.: O ponteiro estourou.">
     <button class="go" id="btn-dl">⬇ Baixar PNG</button>
+    <div class="row" style="margin-top:8px">
+      <button class="go alt" id="btn-cap" type="button">📋 Copiar legenda</button>
+      <button class="go alt" id="btn-link" type="button">🔗 Copiar link</button>
+    </div>
+    <label for="caption">Legenda sugerida (editável)</label>
+    <textarea id="caption" rows="9" spellcheck="false"></textarea>
     <p id="status">Carregando dados…</p>
     <p class="hint"><b>Comparáveis:</b> candidaturas com correspondência segura entre 2022 e 2026. <b>Estreantes:</b> candidatos de 2026 sem declaração localizada em 2022 — o card mostra só o patrimônio atual, sem variação. Cards com <b>valor atípico</b> ganham um selo automático — mantenha, é o que protege a credibilidade do perfil.</p>
   </aside>
@@ -167,8 +177,11 @@
 <script>
 const BASES = ['..','https://iosbilario.github.io/enriquecimetro'];
 let PHOTO_BASE = '../public/photos/';
-let DB=null, ALL=[], NEW=[], VIEW=[], fmt='feed', theme='light', dataset='comp';
+let DB=null, META=null, ALL=[], NEW=[], VIEW=[], fmt='feed', theme='light', dataset='comp';
+let SITE_BASE='https://iosbilario.github.io/enriquecimetro';
 const POOL=()=>dataset==='new'?NEW:ALL;
+const SM=()=>META?.reference_values?.salario_minimo?.['2026']||null;
+const URLQ=new URLSearchParams(location.search);
 const $=s=>document.querySelector(s);
 const norm = s => (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase();
 
@@ -187,11 +200,13 @@ const office = o => cap(o).replace('Vice-governador','Vice-Governador(a)');
 async function load(){
   for(const base of BASES){
     try{
-      const [r1,r2]=await Promise.all([
+      const [r1,r2,r3]=await Promise.all([
         fetch(base+'/public/data/rankings.json'),
-        fetch(base+'/public/data/search-index.json')]);
+        fetch(base+'/public/data/search-index.json'),
+        fetch(base+'/public/data/meta.json')]);
       if(r1.ok && r2.ok){
         DB=await r1.json();
+        META=r3.ok?await r3.json():null;
         const idx=await r2.json();
         const f={}; idx.fields.forEach((n,i)=>f[n]=i);
         const toObj=row=>({ id:row[f.id], name:row[f.name], ballot_name:row[f.ballot_name],
@@ -227,10 +242,81 @@ async function load(){
   let t; $('#q').oninput=()=>{ clearTimeout(t); t=setTimeout(fillCands,180); };
   ['#f-uf','#f-office','#f-party','#f-sort'].forEach(s=>$(s).onchange=fillCands);
   sr.onchange=render; $('#s-cand').onchange=render; $('#s-head').oninput=render;
-  fillCands();
+
+  // ---- estado inicial vindo da URL (links compartilháveis) ----
+  const setSeg=(id,v)=>{ const b=$(id).querySelector(`button[data-v="${v}"]`); if(b) b.click(); };
+  if(URLQ.get('fmt')) setSeg('#s-fmt',URLQ.get('fmt'));
+  if(URLQ.get('tema')) setSeg('#s-theme',URLQ.get('tema'));
+  if(URLQ.get('titulo')) $('#s-head').value=URLQ.get('titulo');
+  const wantId=URLQ.get('id');
+  if(wantId){
+    // localiza o candidato em qualquer conjunto e ajusta filtros para ele aparecer
+    const inNew=NEW.find(e=>e.id===wantId), inAll=ALL.find(e=>e.id===wantId);
+    if(inNew && !inAll) setSeg('#s-set','new');
+    const target=inAll||inNew;
+    if(target){ $('#q').value=target.ballot_name||target.name; }
+    fillCands();
+    const i=VIEW.findIndex(e=>e.id===wantId);
+    if(i>=0){ $('#s-cand').value=String(i); render(); }
+  }else{
+    if(URLQ.get('conjunto')==='new') setSeg('#s-set','new'); else fillCands();
+  }
   $('#status').textContent='✓ '+ALL.length.toLocaleString('pt-BR')+' comparáveis + '
     +NEW.length.toLocaleString('pt-BR')+' estreantes carregados.';
 }
+
+function writeURL(){
+  const p=new URLSearchParams();
+  const e=fmt!=='top5'?cur():null;
+  if(e) p.set('id',e.id);
+  if(fmt!=='feed') p.set('fmt',fmt);
+  if(theme!=='light') p.set('tema',theme);
+  if(dataset!=='comp') p.set('conjunto',dataset);
+  if(fmt==='top5') p.set('ranking',$('#s-rank').value);
+  const h=$('#s-head').value.trim(); if(h) p.set('titulo',h);
+  const qs=p.toString();
+  history.replaceState(null,'',qs?`?${qs}`:location.pathname);
+}
+
+/* ---- legenda automática: manchete + fonte + disclaimer + link + hashtags ---- */
+const HASHTAGS=['#Eleições2026','#TSE','#DadosAbertos','#TransparênciaEleitoral'];
+function stripHtml(s){ return s.replace(/<[^>]+>/g,''); }
+function scaleLine(v){
+  const sm=SM(); if(!sm||!v||v<sm*100) return '';
+  const n=Math.round(v/sm);
+  return `Para escala: ${fmtBRL(v)} equivalem a ${n.toLocaleString('pt-BR')} salários mínimos (R$ ${sm.toLocaleString('pt-BR',{minimumFractionDigits:2})} em 2026).`;
+}
+function buildCaption(){
+  const link=SITE_BASE+'/';
+  const dis='Variação patrimonial, isoladamente, não indica irregularidade. Valores declarados pelos próprios candidatos à Justiça Eleitoral (TSE, dados abertos). Metodologia aberta.';
+  if(fmt==='top5'){
+    const r=DB.rankings[$('#s-rank').value];
+    const lines=r.entries.slice(0,5).map((e,i)=>`${i+1}º ${cap(e.ballot_name||e.name)} (${e.party}-${e.uf}) — ${fmtBRL(e.a2026)} em 2026${e.multiple?`, ${fmtX(e.multiple)} vs 2022`:''}`);
+    return [`${r.label} — patrimônio declarado ao TSE, 2022 → 2026.`, '', ...lines, '', dis, `Confira todos os dados: ${link}`, '', HASHTAGS.join(' ')].join('\n');
+  }
+  const e=cur(); if(!e) return '';
+  const nome=cap(e.ballot_name||e.name);
+  const who=`${nome} (${e.party}-${e.uf}, ${office(e.office)})`;
+  const custom=$('#s-head').value.trim();
+  let head;
+  if(dataset==='new'){
+    head=custom||`${who} estreia em 2026 declarando ${fmtBRL(e.a2026)} em bens à Justiça Eleitoral. Sem declaração localizada em 2022.`;
+  }else{
+    const auto=stripHtml(autoHead(e)).replace(/\.$/,'');
+    head=custom||`${who}: ${auto.charAt(0).toLowerCase()+auto.slice(1)}. De ${fmtBRL(e.a2022)} (2022) para ${fmtBRL(e.a2026)} (2026)${e.change_pct!=null?`, ${fmtPct(e.change_pct)}`:''}.`;
+  }
+  const scale=scaleLine(dataset==='new'?e.a2026:Math.abs(e.change_abs));
+  const atip=e.outlier?'Valor marcado como atípico no conjunto analisado (indicador estatístico descritivo — ver metodologia).':'';
+  const cLink=`${SITE_BASE}/c/${e.id}.html`;
+  const tags=HASHTAGS.concat(e.uf&&e.uf!=='BR'?[`#Política${e.uf}`]:[]).join(' ');
+  return [head, scale, atip, '', dis, `Lista completa de bens e fonte: ${dataset==='new'?link:cLink}`, '', tags].filter(x=>x!==null).join('\n').replace(/\n{3,}/g,'\n\n');
+}
+async function copyText(txt,okMsg){
+  try{ await navigator.clipboard.writeText(txt); $('#status').textContent=okMsg; }
+  catch(e){ $('#status').textContent='⚠ Não consegui copiar automaticamente — selecione e copie manualmente.'; }
+}
+$('#btn-cap').onclick=()=>copyText($('#caption').value,'✓ Legenda copiada.');
+$('#btn-link').onclick=()=>{ writeURL(); copyText(location.href,'✓ Link deste card copiado.'); };
 function applyDataset(v){
   dataset=v;
   const sort=$('#f-sort');
@@ -299,6 +385,7 @@ function newcomerCard(e){
     <div class="bars">
       <div class="bar-row b2026"><div class="yr">2026</div><div class="track"><div class="fill" style="width:100%"></div></div><div class="val">${fmtBRL(e.a2026)}</div></div>
     </div>
+    ${scaleLine(e.a2026)?`<div class="scale">${scaleLine(e.a2026).replace(/^Para escala: /,'≈ ').replace(/ \(R\$.*\)\.$/,'.')}</div>`:''}
     <div class="sub" style="font-size:28px;margin-top:22px">Sem declaração de bens localizada na eleição de 2022 — primeira candidatura registrada na base do TSE ou correspondência não verificada.</div>
     <div class="who">
       <img class="cface" src="${PHOTO_BASE}${e.id}.webp" alt="" crossorigin="anonymous" onerror="this.remove()">
@@ -330,6 +417,7 @@ function candCard(e){
       <div class="bar-row b2022"><div class="yr">2022</div><div class="track"><div class="fill" style="width:${w22}%"></div></div><div class="val">${fmtBRL(e.a2022)}</div></div>
       <div class="bar-row b2026"><div class="yr">2026</div><div class="track"><div class="fill" style="width:${w26}%"></div></div><div class="val">${fmtBRL(e.a2026)}</div></div>
     </div>
+    ${scaleLine(Math.abs(e.change_abs))?`<div class="scale">${scaleLine(Math.abs(e.change_abs)).replace(/^Para escala: /,'≈ ').replace(/ \(R\$.*\)\.$/,' de diferença.')}</div>`:''}
     <div class="who">
       <img class="cface" src="${PHOTO_BASE}${e.id}.webp" alt="" crossorigin="anonymous" onerror="this.remove()">
       <div>
@@ -370,14 +458,18 @@ function render(){
   if(!DB) return;
   const p=$('#post');
   p.className='post '+(fmt==='story'?'story':'feed')+(theme==='dark'?' dark':'');
-  if(fmt!=='top5' && !cur()){ p.innerHTML=''; return; }
+  if(fmt!=='top5' && !cur()){ p.innerHTML=''; $('#caption').value=''; writeURL(); return; }
   p.innerHTML = fmt==='top5' ? top5Card() : candCard(cur());
   const stageW=$('.stage').clientWidth-60;
   const s=Math.min(0.62, stageW/1080);
   $('#scaler').style.transform=`scale(${s})`;
   $('#scaler').style.height=(fmt==='story'?1920:1080)*s+'px';
+  $('#caption').value=buildCaption();
+  writeURL();
 }
-window.addEventListener('resize',render);
+window.addEventListener('resize',()=>{ if(!DB) return;
+  const stageW=$('.stage').clientWidth-60, s=Math.min(0.62, stageW/1080);
+  $('#scaler').style.transform=`scale(${s})`; $('#scaler').style.height=(fmt==='story'?1920:1080)*s+'px'; });
 
 $('#btn-dl').onclick=async()=>{
   const sc=$('#scaler'); const old=sc.style.transform;

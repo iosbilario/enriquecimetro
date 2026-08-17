@@ -178,6 +178,7 @@ def build(config: dict, elections: dict[int, dict], persons: list[dict], manifes
             for meta in manifest.values()
         ],
         "attribution": config.get("attribution", {}),
+        "reference_values": config.get("reference_values", {}),
         "filters": {
             "uf": sorted({e["uf"] for e in index_items if e["uf"]}),
             "party": sorted({e["party"] for e in index_items if e["party"]}),

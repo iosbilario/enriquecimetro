@@ -188,6 +188,16 @@
     const box = $("#chart");
     box.append(svgBarChart(chartEntries));
 
+    // Ação: gerar card para redes sociais (Fábrica de Posts abre já neste candidato)
+    const timeline = document.querySelector(".timeline");
+    if (timeline) {
+      timeline.after(
+        el("p", { class: "actions" },
+          el("a", { class: "btn-share", href: `social/fabrica-de-posts.html?id=${id}` },
+            "Gerar post deste candidato"))
+      );
+    }
+
     // Bens por eleição (mais recente primeiro na leitura? ordem cronológica)
     const assetsRoot = $("#assets");
     ["2022", "2026"].forEach((y) => {
