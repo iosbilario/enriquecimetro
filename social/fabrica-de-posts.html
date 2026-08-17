@@ -38,7 +38,11 @@
   .post.dark .scale{color:#98948c}
   .hint{font-size:.75rem;color:var(--ink-faint);margin-top:10px;line-height:1.45}
   #status{font-size:.8rem;margin-top:10px;color:var(--accent)}
-  .stage{display:flex;align-items:flex-start;justify-content:center;padding:30px;overflow:auto}
+  .stage{display:flex;flex-direction:column;align-items:center;padding:30px;overflow:auto;gap:18px}
+  #strip{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:100%}
+  #strip .strip-label{width:100%;text-align:center;font-size:.78rem;color:var(--ink-faint)}
+  #strip .thumb{width:180px;height:180px;overflow:hidden;border-radius:8px;border:1px solid var(--line);flex:none}
+  #strip .thumb .post{transform:scale(calc(180/1080));transform-origin:top left}
   #scaler{transform-origin:top center}
   header .back{margin-left:auto;font-size:.85rem;color:var(--accent);text-decoration:none;white-space:nowrap}
   header img.lg{width:30px;height:30px;border-radius:7px;flex:none}
@@ -150,11 +154,9 @@
       <button data-v="feed" class="on">Feed 1:1</button>
       <button data-v="story">Story 9:16</button>
       <button data-v="top5">Top 5</button>
+      <button data-v="carousel">Carrossel</button>
     </div>
-    <div id="rank-wrap" hidden>
-      <label for="s-rank">Ranking do Top 5</label>
-      <select id="s-rank"></select>
-    </div>
+    <p class="hint" id="top-hint" hidden>Top 5 e Carrossel usam os <b>filtros e a ordenação</b> acima: filtre por estado/cargo para gerar rankings regionais (ex.: “Senado · MG”). O Carrossel gera capa + 5 slides.</p>
     <label>Tema</label>
     <div class="seg" id="s-theme">
       <button data-v="light" class="on">Claro</button>
@@ -226,10 +228,6 @@ async function load(){
   }
   if(!DB||!ALL.length){ $('#status').textContent='⚠ Não consegui carregar os dados (verifique a conexão).'; return; }
 
-  const sr=$('#s-rank');
-  for(const [k,v] of Object.entries(DB.rankings)){
-    const o=document.createElement('option'); o.value=k; o.textContent=v.label; sr.appendChild(o);
-  }
   // filtros a partir do catálogo completo, sempre ordenados
   const fill=(sel,vals)=>{ const n=$(sel);
     [...new Set(vals.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'))
@@ -241,13 +239,17 @@ async function load(){
 
   let t; $('#q').oninput=()=>{ clearTimeout(t); t=setTimeout(fillCands,180); };
   ['#f-uf','#f-office','#f-party','#f-sort'].forEach(s=>$(s).onchange=fillCands);
-  sr.onchange=render; $('#s-cand').onchange=render; $('#s-head').oninput=render;
+  $('#s-cand').onchange=render; $('#s-head').oninput=render;
 
   // ---- estado inicial vindo da URL (links compartilháveis) ----
   const setSeg=(id,v)=>{ const b=$(id).querySelector(`button[data-v="${v}"]`); if(b) b.click(); };
   if(URLQ.get('fmt')) setSeg('#s-fmt',URLQ.get('fmt'));
   if(URLQ.get('tema')) setSeg('#s-theme',URLQ.get('tema'));
   if(URLQ.get('titulo')) $('#s-head').value=URLQ.get('titulo');
+  if(URLQ.get('uf')) $('#f-uf').value=URLQ.get('uf');
+  if(URLQ.get('cargo')) $('#f-office').value=URLQ.get('cargo');
+  if(URLQ.get('partido')) $('#f-party').value=URLQ.get('partido');
+  if(URLQ.get('ordem')) $('#f-sort').value=URLQ.get('ordem');
   const wantId=URLQ.get('id');
   if(wantId){
     // localiza o candidato em qualquer conjunto e ajusta filtros para ele aparecer
@@ -272,7 +274,9 @@ function writeURL(){
   if(fmt!=='feed') p.set('fmt',fmt);
   if(theme!=='light') p.set('tema',theme);
   if(dataset!=='comp') p.set('conjunto',dataset);
-  if(fmt==='top5') p.set('ranking',$('#s-rank').value);
+  const uf=$('#f-uf').value, of=$('#f-office').value, pt=$('#f-party').value, so=$('#f-sort').value;
+  if(uf) p.set('uf',uf); if(of) p.set('cargo',of); if(pt) p.set('partido',pt);
+  if(so && so!=='abs') p.set('ordem',so);
   const h=$('#s-head').value.trim(); if(h) p.set('titulo',h);
   const qs=p.toString();
   history.replaceState(null,'',qs?`?${qs}`:location.pathname);
@@ -289,10 +293,16 @@ function scaleLine(v){
 function buildCaption(){
   const link=SITE_BASE+'/';
   const dis='Variação patrimonial, isoladamente, não indica irregularidade. Valores declarados pelos próprios candidatos à Justiça Eleitoral (TSE, dados abertos). Metodologia aberta.';
-  if(fmt==='top5'){
-    const r=DB.rankings[$('#s-rank').value];
-    const lines=r.entries.slice(0,5).map((e,i)=>`${i+1}º ${cap(e.ballot_name||e.name)} (${e.party}-${e.uf}) — ${fmtBRL(e.a2026)} em 2026${e.multiple?`, ${fmtX(e.multiple)} vs 2022`:''}`);
-    return [`${r.label} — patrimônio declarado ao TSE, 2022 → 2026.`, '', ...lines, '', dis, `Confira todos os dados: ${link}`, '', HASHTAGS.join(' ')].join('\n');
+  if(fmt==='top5'||fmt==='carousel'){
+    const scope=scopeLabel();
+    const lines=VIEW.slice(0,5).map((e,i)=>{ const rv=rankValue(e);
+      return `${i+1}º ${cap(e.ballot_name||e.name)} (${e.party}-${e.uf}) — ${rv.v} · ${rv.m}${e.outlier?' · valor atípico':''}`; });
+    const uf=$('#f-uf').value;
+    const tags=HASHTAGS.concat(uf&&uf!=='BR'?[`#Política${uf}`]:[]).join(' ');
+    const title=($('#s-head').value.trim()||rankTitle())+(scope?` — ${scope}`:'');
+    return [`${title}. Patrimônio declarado ao TSE${dataset==='new'?', 2026':', 2022 → 2026'}.`, '', ...lines, '',
+      fmt==='carousel'?'Deslize para ver cada candidatura em detalhe.':'', dis, `Confira todos os dados: ${link}`, '', tags]
+      .join('\n').replace(/\n{3,}/g,'\n\n');
   }
   const e=cur(); if(!e) return '';
   const nome=cap(e.ballot_name||e.name);
@@ -356,7 +366,8 @@ const cur=()=>VIEW[+$('#s-cand').value||0];
 
 function seg(id,cb){ $(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{
   $(id).querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); cb(b.dataset.v); });}
-seg('#s-fmt',v=>{fmt=v;$('#rank-wrap').hidden=(v!=='top5');render()});
+seg('#s-fmt',v=>{fmt=v;$('#top-hint').hidden=!(v==='top5'||v==='carousel');
+  $('#btn-dl').textContent=v==='carousel'?'⬇ Baixar carrossel (capa + 5)':'⬇ Baixar PNG';render()});
 seg('#s-theme',v=>{theme=v;render()});
 seg('#s-set',applyDataset);
 
@@ -433,37 +444,82 @@ function candCard(e){
   </div>
   ${footer()}`;
 }
+/* ---- Top 5 / Carrossel: sempre sobre VIEW (filtros + ordenação do painel) ---- */
+const SORT_LABEL={abs:'Maiores aumentos do patrimônio declarado',pct:'Maiores aumentos percentuais',
+  mult:'Patrimônios que mais multiplicaram',assets:'Maiores patrimônios declarados',
+  dec:'Maiores reduções do patrimônio declarado',name:'Candidatos (A–Z)'};
+function scopeLabel(){
+  const parts=[];
+  const of=$('#f-office').value, uf=$('#f-uf').value, pt=$('#f-party').value;
+  if(of) parts.push(of.replace('Vice-governador','Vice-Governador(a)'));
+  if(uf) parts.push(uf==='BR'?'Brasil':uf);
+  if(pt) parts.push(pt);
+  return parts.join(' · ');
+}
+function rankTitle(){
+  const base=SORT_LABEL[$('#f-sort').value]||SORT_LABEL.abs;
+  return dataset==='new'?'Estreantes 2026 — '+base.toLowerCase().replace('do patrimônio declarado','').trim():base;
+}
+function rankValue(e){
+  const s=$('#f-sort').value;
+  if(dataset==='new') return {v:fmtBRL(e.a2026),m:'declarado em 2026'};
+  if(s==='pct') return {v:fmtPct(e.change_pct??0),m:`${fmtBRL(e.a2022)} → ${fmtBRL(e.a2026)}`};
+  if(s==='mult') return {v:e.multiple?fmtX(e.multiple):'—',m:`${fmtBRL(e.a2022)} → ${fmtBRL(e.a2026)}`};
+  if(s==='dec') return {v:'−'+fmtBRL(Math.abs(e.change_abs)),m:`${fmtBRL(e.a2022)} → ${fmtBRL(e.a2026)}`};
+  if(s==='assets') return {v:fmtBRL(e.a2026),m:e.multiple?`${fmtX(e.multiple)} vs 2022`:'vs 2022: R$ 0'};
+  return {v:(e.change_abs>=0?'+':'−')+fmtBRL(Math.abs(e.change_abs)),m:e.multiple?`${fmtX(e.multiple)} vs 2022`:`de ${fmtBRL(e.a2022)}`};
+}
 function top5Card(){
-  const r=DB.rankings[$('#s-rank').value];
-  const rows=r.entries.slice(0,5).map((e,i)=>`
+  const top=VIEW.slice(0,5);
+  const scope=scopeLabel();
+  const rows=top.map((e,i)=>{ const rv=rankValue(e); return `
     <div class="rk-row">
       <div class="pos">${i+1}º</div>
       <img class="rface" src="${PHOTO_BASE}${e.id}.webp" alt="" crossorigin="anonymous" onerror="this.style.visibility='hidden'">
       <div><div class="nm">${cap(e.ballot_name||e.name)}</div>
            <div class="meta">${e.party} · ${e.uf} · ${office(e.office)}${e.outlier?' · valor atípico':''}</div></div>
-      <div class="dv"><div class="v">${fmtBRL(e.a2026)}</div><div class="m">${fmtX(e.multiple)} vs 2022</div></div>
-    </div>`).join('');
+      <div class="dv"><div class="v">${rv.v}</div><div class="m">${rv.m}</div></div>
+    </div>`;}).join('');
+  const custom=$('#s-head').value.trim();
   return `
   <div class="topbar"></div>
   <div class="inner">
-    <div class="kicker">Enriquecímetro · Eleições 2026</div>
-    <div class="headline" style="font-size:66px">${r.label}<span style="color:var(--accent)">.</span></div>
-    <div class="sub" style="font-size:28px;margin-top:12px">Patrimônio declarado ao TSE — 2022 → 2026</div>
-    <div class="rk">${rows}</div>
+    <div class="kicker">Enriquecímetro · ${scope||'Eleições 2026'}</div>
+    <div class="headline" style="font-size:${scope?60:66}px">${custom||rankTitle()}<span style="color:var(--accent)">.</span></div>
+    <div class="sub" style="font-size:28px;margin-top:12px">${dataset==='new'?'Patrimônio declarado ao TSE em 2026 — sem base em 2022':'Patrimônio declarado ao TSE — 2022 → 2026'}${top.length<5?` · ${top.length} candidatura(s) no recorte`:''}</div>
+    <div class="rk">${rows||'<div class="sub" style="font-size:30px;margin-top:40px">Nenhuma candidatura neste recorte.</div>'}</div>
     <div style="margin-top:auto"></div>
   </div>
   ${footer()}`;
+}
+/* Carrossel: capa (Top 5) + um slide por candidato, numerado */
+function carouselCover(){ return top5Card(); }
+function carouselSlide(e,i,n){
+  const html=candCard(e);
+  return html.replace('<div class="kicker">Enriquecímetro · Eleições 2026</div>',
+    `<div class="kicker">${i}º de ${n} · ${scopeLabel()||'Enriquecímetro'} · deslize →</div>`)
+    .replace('<div class="kicker">Enriquecímetro · Estreantes 2026</div>',
+    `<div class="kicker">${i}º de ${n} · Estreantes 2026${scopeLabel()?' · '+scopeLabel():''} · deslize →</div>`);
 }
 function render(){
   if(!DB) return;
   const p=$('#post');
   p.className='post '+(fmt==='story'?'story':'feed')+(theme==='dark'?' dark':'');
-  if(fmt!=='top5' && !cur()){ p.innerHTML=''; $('#caption').value=''; writeURL(); return; }
-  p.innerHTML = fmt==='top5' ? top5Card() : candCard(cur());
+  const isList=(fmt==='top5'||fmt==='carousel');
+  if(!isList && !cur()){ p.innerHTML=''; $('#caption').value=''; writeURL(); return; }
+  p.innerHTML = isList ? top5Card() : candCard(cur());
   const stageW=$('.stage').clientWidth-60;
   const s=Math.min(0.62, stageW/1080);
   $('#scaler').style.transform=`scale(${s})`;
   $('#scaler').style.height=(fmt==='story'?1920:1080)*s+'px';
+  // pré-visualização dos slides do carrossel abaixo da capa
+  let strip=$('#strip');
+  if(fmt==='carousel'){
+    if(!strip){ strip=document.createElement('div'); strip.id='strip'; $('.stage').appendChild(strip); }
+    const n=Math.min(5,VIEW.length);
+    strip.innerHTML='<div class="strip-label">Slides do carrossel (a capa acima é o slide 1)</div>'+
+      VIEW.slice(0,n).map((e,i)=>`<div class="thumb"><div class="post feed${theme==='dark'?' dark':''}">${carouselSlide(e,i+2,n+1)}</div></div>`).join('');
+  }else if(strip){ strip.remove(); }
   $('#caption').value=buildCaption();
   writeURL();
 }
@@ -471,37 +527,66 @@ window.addEventListener('resize',()=>{ if(!DB) return;
   const stageW=$('.stage').clientWidth-60, s=Math.min(0.62, stageW/1080);
   $('#scaler').style.transform=`scale(${s})`; $('#scaler').style.height=(fmt==='story'?1920:1080)*s+'px'; });
 
-$('#btn-dl').onclick=async()=>{
-  const sc=$('#scaler'); const old=sc.style.transform;
-  sc.style.transform='none'; $('#status').textContent='Gerando PNG…';
-  try{
-    const canvas=await html2canvas($('#post'),{scale:1,backgroundColor:null,useCORS:true,windowWidth:1200});
-    const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
-    if(!blob) throw new Error('canvas vazio');
-    const e=fmt==='top5'?$('#s-rank').value:(cur().ballot_name||'card').toLowerCase()
-      .normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,'-');
-    const fname=`enriquecimetro-${e}-${fmt}.png`;
-    const file=new File([blob],fname,{type:'image/png'});
-    const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    // No celular, a folha nativa de compartilhar é o caminho confiável
-    // (salvar em Fotos, WhatsApp, Instagram). data:/window.open falham no iOS.
-    if(mobile && navigator.canShare && navigator.canShare({files:[file]})){
-      try{
-        await navigator.share({files:[file]});
-        $('#status').textContent='✓ Card compartilhado/salvo.';
-        sc.style.transform=old; return;
-      }catch(err){
-        if(err.name==='AbortError'){ $('#status').textContent='Compartilhamento cancelado.'; sc.style.transform=old; return; }
-        // NotAllowedError etc. → cai para o download por blob
-      }
-    }
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.download=fname; a.href=url;
+const slug=s=>(s||'card').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+async function nodeToFile(node,fname){
+  const canvas=await html2canvas(node,{scale:1,backgroundColor:null,useCORS:true,windowWidth:1200});
+  const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
+  if(!blob) throw new Error('canvas vazio');
+  return new File([blob],fname,{type:'image/png'});
+}
+async function deliver(files){
+  // Celular: folha nativa (Fotos, WhatsApp, Instagram) — aceita vários arquivos.
+  if(mobile && navigator.canShare && navigator.canShare({files})){
+    try{ await navigator.share({files}); return 'shared'; }
+    catch(err){ if(err.name==='AbortError') return 'cancel'; }
+  }
+  for(const f of files){
+    const url=URL.createObjectURL(f);
+    const a=document.createElement('a'); a.download=f.name; a.href=url;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),30000);
-    $('#status').textContent='✓ PNG baixado.';
-  }catch(err){ $('#status').textContent='⚠ Erro ao gerar PNG: '+err.message; }
+    await new Promise(r=>setTimeout(r,350)); // navegadores engasgam com cliques simultâneos
+  }
+  return 'downloaded';
+}
+$('#btn-dl').onclick=async()=>{
+  const sc=$('#scaler'); const old=sc.style.transform;
+  sc.style.transform='none';
+  try{
+    const scope=slug(scopeLabel())||'brasil';
+    let files=[];
+    if(fmt==='carousel'){
+      const n=Math.min(5,VIEW.length);
+      if(!n) throw new Error('nenhuma candidatura no recorte');
+      $('#status').textContent=`Gerando carrossel (1/${n+1})…`;
+      files.push(await nodeToFile($('#post'),`enriquecimetro-carrossel-${scope}-01-capa.png`));
+      // slides em tamanho real num palco oculto
+      const ghost=document.createElement('div');
+      ghost.style.cssText='position:fixed;left:-20000px;top:0';
+      document.body.appendChild(ghost);
+      try{
+        for(let i=0;i<n;i++){
+          $('#status').textContent=`Gerando carrossel (${i+2}/${n+1})…`;
+          const e=VIEW[i];
+          ghost.innerHTML=`<div class="post feed${theme==='dark'?' dark':''}">${carouselSlide(e,i+2,n+1)}</div>`;
+          const imgs=[...ghost.querySelectorAll('img')];
+          await Promise.all(imgs.map(im=>im.complete?null:new Promise(r=>{im.onload=im.onerror=r;})));
+          files.push(await nodeToFile(ghost.firstElementChild,
+            `enriquecimetro-carrossel-${scope}-${String(i+2).padStart(2,'0')}-${slug(e.ballot_name||e.name)}.png`));
+        }
+      }finally{ ghost.remove(); }
+    }else{
+      $('#status').textContent='Gerando PNG…';
+      const name=(fmt==='top5')?`top5-${slug(rankTitle())}-${scope}`:slug(cur().ballot_name||cur().name);
+      files.push(await nodeToFile($('#post'),`enriquecimetro-${name}-${fmt}.png`));
+    }
+    const r=await deliver(files);
+    $('#status').textContent= r==='cancel'?'Compartilhamento cancelado.'
+      : r==='shared'?`✓ ${files.length} imagem(ns) compartilhada(s)/salva(s).`
+      : `✓ ${files.length} PNG(s) baixado(s).`;
+  }catch(err){ $('#status').textContent='⚠ Erro ao gerar: '+err.message; }
   sc.style.transform=old;
 };
 load();
