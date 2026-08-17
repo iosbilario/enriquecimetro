@@ -113,6 +113,11 @@
 </header>
 <div class="app">
   <aside class="panel">
+    <label>Conjunto</label>
+    <div class="seg" id="s-set">
+      <button data-v="comp" class="on">Comparáveis 2022→2026</button>
+      <button data-v="new">Estreantes 2026</button>
+    </div>
     <label for="q">Buscar candidato</label>
     <input type="search" id="q" placeholder="Nome, nome de urna ou partido" autocomplete="off">
     <div class="row">
@@ -155,14 +160,15 @@
     <input type="text" id="s-head" placeholder="Ex.: O ponteiro estourou.">
     <button class="go" id="btn-dl">⬇ Baixar PNG</button>
     <p id="status">Carregando dados…</p>
-    <p class="hint">Somente candidaturas com correspondência segura entre 2022 e 2026 (bens declarados ao TSE). Cards de candidatos marcados como <b>valor atípico</b> ganham um selo automático — mantenha, é o que protege a credibilidade do perfil.</p>
+    <p class="hint"><b>Comparáveis:</b> candidaturas com correspondência segura entre 2022 e 2026. <b>Estreantes:</b> candidatos de 2026 sem declaração localizada em 2022 — o card mostra só o patrimônio atual, sem variação. Cards com <b>valor atípico</b> ganham um selo automático — mantenha, é o que protege a credibilidade do perfil.</p>
   </aside>
   <div class="stage"><div id="scaler"><div id="post" class="post feed"></div></div></div>
 </div>
 <script>
 const BASES = ['..','https://iosbilario.github.io/enriquecimetro'];
 let PHOTO_BASE = '../public/photos/';
-let DB=null, ALL=[], VIEW=[], fmt='feed', theme='light';
+let DB=null, ALL=[], NEW=[], VIEW=[], fmt='feed', theme='light', dataset='comp';
+const POOL=()=>dataset==='new'?NEW:ALL;
 const $=s=>document.querySelector(s);
 const norm = s => (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase();
 
@@ -188,15 +194,16 @@ async function load(){
         DB=await r1.json();
         const idx=await r2.json();
         const f={}; idx.fields.forEach((n,i)=>f[n]=i);
-        ALL=idx.items
-          .filter(row=>row[f.a2022]!==null && row[f.a2026]!==null)
-          .map(row=>({ id:row[f.id], name:row[f.name], ballot_name:row[f.ballot_name],
+        const toObj=row=>({ id:row[f.id], name:row[f.name], ballot_name:row[f.ballot_name],
             party:row[f.party], uf:row[f.uf], office:row[f.office],
             a2022:row[f.a2022], a2026:row[f.a2026],
             change_abs:row[f.change_abs], change_pct:row[f.change_pct],
             multiple:row[f.a2022]>0 ? row[f.a2026]/row[f.a2022] : null,
             outlier:row[f.outlier],
-            hay:norm(row[f.name]+' '+row[f.ballot_name]+' '+row[f.party]) }));
+            hay:norm(row[f.name]+' '+row[f.ballot_name]+' '+row[f.party]) });
+        ALL=idx.items.filter(row=>row[f.a2022]!==null && row[f.a2026]!==null).map(toObj);
+        // Estreantes: candidatura em 2026 sem declaração localizada em 2022
+        NEW=idx.items.filter(row=>row[f.a2022]===null && row[f.a2026]!==null).map(toObj);
         if(base.startsWith('http')) PHOTO_BASE=base+'/public/photos/';
         break;
       }
@@ -212,15 +219,29 @@ async function load(){
   const fill=(sel,vals)=>{ const n=$(sel);
     [...new Set(vals.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'))
       .forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; n.appendChild(o); }); };
-  fill('#f-uf', ALL.map(e=>e.uf));
-  fill('#f-office', ALL.map(e=>cap(e.office)));
-  fill('#f-party', ALL.map(e=>e.party));
+  const both=ALL.concat(NEW);
+  fill('#f-uf', both.map(e=>e.uf));
+  fill('#f-office', both.map(e=>cap(e.office)));
+  fill('#f-party', both.map(e=>e.party));
 
   let t; $('#q').oninput=()=>{ clearTimeout(t); t=setTimeout(fillCands,180); };
   ['#f-uf','#f-office','#f-party','#f-sort'].forEach(s=>$(s).onchange=fillCands);
   sr.onchange=render; $('#s-cand').onchange=render; $('#s-head').oninput=render;
   fillCands();
-  $('#status').textContent='✓ '+ALL.length.toLocaleString('pt-BR')+' candidatos comparáveis carregados.';
+  $('#status').textContent='✓ '+ALL.length.toLocaleString('pt-BR')+' comparáveis + '
+    +NEW.length.toLocaleString('pt-BR')+' estreantes carregados.';
+}
+function applyDataset(v){
+  dataset=v;
+  const sort=$('#f-sort');
+  // ordenações de variação não fazem sentido para estreantes
+  sort.querySelectorAll('option').forEach(o=>{
+    const isVar=['abs','pct','mult','dec'].includes(o.value);
+    o.hidden=(v==='new'&&isVar); o.disabled=o.hidden;
+  });
+  if(v==='new' && sort.selectedOptions[0]?.disabled) sort.value='assets';
+  if(v==='comp' && !['abs','pct','mult','dec','assets','name'].includes(sort.value)) sort.value='abs';
+  fillCands();
 }
 const SORTS={
   abs:(a,b)=>(b.change_abs??-1e18)-(a.change_abs??-1e18),
@@ -232,9 +253,9 @@ const SORTS={
 };
 function fillCands(){
   const q=norm($('#q').value), uf=$('#f-uf').value, of=$('#f-office').value, pt=$('#f-party').value;
-  VIEW=ALL.filter(e=>
+  VIEW=POOL().filter(e=>
     (!uf||e.uf===uf) && (!of||cap(e.office)===of) && (!pt||e.party===pt) && (!q||e.hay.includes(q)));
-  VIEW.sort(SORTS[$('#f-sort').value]||SORTS.abs);
+  VIEW.sort(SORTS[$('#f-sort').value]||(dataset==='new'?SORTS.assets:SORTS.abs));
   const sc=$('#s-cand'); sc.innerHTML='';
   const LIMIT=300;
   VIEW.slice(0,LIMIT).forEach((e,i)=>{ const o=document.createElement('option'); o.value=i;
@@ -251,6 +272,7 @@ function seg(id,cb){ $(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{
   $(id).querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); cb(b.dataset.v); });}
 seg('#s-fmt',v=>{fmt=v;$('#rank-wrap').hidden=(v!=='top5');render()});
 seg('#s-theme',v=>{theme=v;render()});
+seg('#s-set',applyDataset);
 
 function autoHead(e){
   // manchete escolhida pelo dado mais expressivo do próprio candidato
@@ -264,7 +286,36 @@ function footer(){
     Variação patrimonial, isoladamente, não indica irregularidade. Metodologia aberta no site.</div>
     <div class="at">@enriquecimetro</div></div>`;
 }
+function newcomerCard(e){
+  const story=fmt==='story';
+  const headHtml = $('#s-head').value.trim()
+      ? `<span class="big">${$('#s-head').value.trim()}</span>`
+      : `Estreia em 2026 declarando <span class="big">${fmtBRL(e.a2026)}</span> em bens.`;
+  return `
+  <div class="topbar"></div>
+  <div class="inner">
+    <div class="kicker">Enriquecímetro · Estreantes 2026</div>
+    <div class="headline" style="font-size:${story?96:84}px">${headHtml}</div>
+    <div class="bars">
+      <div class="bar-row b2026"><div class="yr">2026</div><div class="track"><div class="fill" style="width:100%"></div></div><div class="val">${fmtBRL(e.a2026)}</div></div>
+    </div>
+    <div class="sub" style="font-size:28px;margin-top:22px">Sem declaração de bens localizada na eleição de 2022 — primeira candidatura registrada na base do TSE ou correspondência não verificada.</div>
+    <div class="who">
+      <img class="cface" src="${PHOTO_BASE}${e.id}.webp" alt="" crossorigin="anonymous" onerror="this.remove()">
+      <div>
+        <div class="name">${cap(e.ballot_name||e.name)}</div>
+        <div class="chips">
+          <div class="chip">${e.party} · ${e.uf}</div>
+          <div class="chip">${office(e.office)}</div>
+          <div class="chip">estreante · sem base 2022</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  ${footer()}`;
+}
 function candCard(e){
+  if(dataset==='new') return newcomerCard(e);
   const story=fmt==='story';
   const headHtml = $('#s-head').value.trim()
       ? `<span class="big">${$('#s-head').value.trim()}</span>` : autoHead(e);
