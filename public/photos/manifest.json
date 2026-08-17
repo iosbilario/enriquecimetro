@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-08-15T01:53:36+00:00",
+  "generated_at": "2026-08-17T10:08:17+00:00",
   "election": 2026,
   "source_template": "https://cdn.tse.jus.br/estatistica/sead/eleicoes/eleicoes{year}/fotos/foto_cand{year}_{uf}_div.zip",
   "thumbnail_px": 96,
-  "eligible": 5770,
-  "generated_now": 5755,
-  "already_present": 0,
-  "missing": 15,
+  "eligible": 6239,
+  "generated_now": 485,
+  "already_present": 5750,
+  "missing": 4,
   "note": "Fotos oficiais de urna publicadas pelo TSE (Portal de Dados Abertos). Miniaturas geradas apenas para candidaturas com correspondência entre eleições."
 }
