@@ -94,6 +94,35 @@
   .rk-row .dv{text-align:right}
   .rk-row .dv .v{font-size:38px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
   .rk-row .dv .m{font-size:24px;color:var(--ink-faint)}
+  /* duelo: duas colunas simétricas */
+  .duel{display:grid;grid-template-columns:1fr 64px 1fr;gap:0 24px;margin-top:38px;align-items:start}
+  .duel .side{display:flex;flex-direction:column;align-items:center;text-align:center}
+  .duel .vs{font-family:var(--serif);font-size:44px;font-weight:700;color:var(--ink-faint);align-self:center;text-align:center}
+  .duel .cface{width:170px;height:170px}
+  .duel .name{font-size:42px;margin-top:18px;line-height:1.1}
+  .duel .party{font-size:26px;color:var(--ink-faint);margin-top:6px}
+  .duel .stat{margin-top:26px;width:100%}
+  .duel .stat .lbl{font-size:24px;color:var(--ink-faint);letter-spacing:.06em;text-transform:uppercase}
+  .duel .stat .num{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--accent);line-height:1.05;font-variant-numeric:tabular-nums}
+  .duel .stat .num.neu{color:var(--ink)}
+  .duel .stat .sm{font-size:26px;color:var(--ink-soft);margin-top:4px}
+  .duel .chip{margin-top:14px}
+  .post .duel-sub{font-size:28px;color:var(--ink-soft);margin-top:14px}
+  /* correção */
+  .post.fix .topbar{background:var(--down)}
+  .post.fix .kicker{color:var(--down)}
+  .fixbox{margin-top:30px;border:3px solid var(--down);border-radius:16px;padding:26px 30px;background:#fdf3ec}
+  .fixbox .row2{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+  .fixbox .lbl{font-size:24px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);font-weight:700}
+  .fixbox .was{font-size:34px;color:var(--ink-faint);text-decoration:line-through;margin-top:6px;line-height:1.25}
+  .fixbox .now{font-size:34px;color:var(--ink);font-weight:700;margin-top:6px;line-height:1.25}
+  .fixbox .why{font-size:26px;color:var(--ink-soft);margin-top:18px;line-height:1.35}
+  .post.dark .fixbox{background:#2b2118;border-color:var(--down-lt)}
+  .post.dark.fix .topbar{background:var(--down-lt)}
+  .post.dark.fix .kicker{color:var(--down-lt)}
+  .post.dark .fixbox .now{color:var(--cream)}
+  .post.dark .duel .stat .num.neu,.post.dark .duel .name{color:var(--cream)}
+  .post.dark .duel .stat .num{color:var(--accent-lt)}
   /* dark mode card */
   .post.dark{background:var(--navy)}
   .post.dark .headline,.post.dark .name{color:var(--cream)}
@@ -156,7 +185,25 @@
       <button data-v="top5">Top 5</button>
       <button data-v="carousel">Carrossel</button>
     </div>
+    <div class="seg" id="s-fmt2" style="margin-top:6px">
+      <button data-v="duel">Duelo</button>
+      <button data-v="fix">Correção</button>
+    </div>
     <p class="hint" id="top-hint" hidden>Top 5 e Carrossel usam os <b>filtros e a ordenação</b> acima: filtre por estado/cargo para gerar rankings regionais (ex.: “Senado · MG”). O Carrossel gera capa + 5 slides.</p>
+
+    <div id="duel-wrap" hidden>
+      <label for="s-cand2">Adversário <span id="count2" style="font-weight:400;color:var(--ink-faint)"></span></label>
+      <select id="s-cand2" size="5"></select>
+      <p class="hint">Só aparecem candidatos da <b>mesma disputa</b> (mesmo cargo e mesmo estado) e do mesmo conjunto. Não é ranking: o card mostra os dois lado a lado, sem “vencedor”.</p>
+    </div>
+
+    <div id="fix-wrap" hidden>
+      <label for="fix-what">O que o post original dizia</label>
+      <input type="text" id="fix-what" placeholder="Ex.: patrimônio de R$ 2,5 mi em 2022">
+      <label for="fix-why">Motivo da correção</label>
+      <input type="text" id="fix-why" placeholder="Ex.: linhas duplicadas no arquivo do TSE contadas duas vezes">
+      <p class="hint">O card de correção reproduz o candidato selecionado com o dado <b>vigente</b> e destaca o que mudou. Publique no mesmo formato do post original — corrigir rápido vale mais que não errar (guia, seção 09).</p>
+    </div>
     <label>Tema</label>
     <div class="seg" id="s-theme">
       <button data-v="light" class="on">Claro</button>
@@ -243,7 +290,9 @@ async function load(){
 
   // ---- estado inicial vindo da URL (links compartilháveis) ----
   const setSeg=(id,v)=>{ const b=$(id).querySelector(`button[data-v="${v}"]`); if(b) b.click(); };
-  if(URLQ.get('fmt')) setSeg('#s-fmt',URLQ.get('fmt'));
+  if(URLQ.get('dizia')) $('#fix-what').value=URLQ.get('dizia');
+  if(URLQ.get('motivo')) $('#fix-why').value=URLQ.get('motivo');
+  if(URLQ.get('fmt')) setFmt(URLQ.get('fmt'));
   if(URLQ.get('tema')) setSeg('#s-theme',URLQ.get('tema'));
   if(URLQ.get('titulo')) $('#s-head').value=URLQ.get('titulo');
   if(URLQ.get('uf')) $('#f-uf').value=URLQ.get('uf');
@@ -274,6 +323,8 @@ function writeURL(){
   if(fmt!=='feed') p.set('fmt',fmt);
   if(theme!=='light') p.set('tema',theme);
   if(dataset!=='comp') p.set('conjunto',dataset);
+  if(fmt==='duel' && rival()) p.set('vs',rival().id);
+  if(fmt==='fix'){ const w=$('#fix-what').value.trim(), y=$('#fix-why').value.trim(); if(w) p.set('dizia',w); if(y) p.set('motivo',y); }
   const uf=$('#f-uf').value, of=$('#f-office').value, pt=$('#f-party').value, so=$('#f-sort').value;
   if(uf) p.set('uf',uf); if(of) p.set('cargo',of); if(pt) p.set('partido',pt);
   if(so && so!=='abs') p.set('ordem',so);
@@ -306,6 +357,23 @@ function buildCaption(){
   }
   const e=cur(); if(!e) return '';
   const nome=cap(e.ballot_name||e.name);
+  if(fmt==='duel'){
+    const b=rival(); if(!b) return '';
+    const line=x=>dataset==='new'
+      ? `${cap(x.ballot_name||x.name)} (${x.party}): ${fmtBRL(x.a2026)} declarados em 2026`
+      : `${cap(x.ballot_name||x.name)} (${x.party}): ${fmtBRL(x.a2022)} → ${fmtBRL(x.a2026)}${x.change_pct!=null?` (${fmtPct(x.change_pct)})`:''}${x.outlier?' · valor atípico':''}`;
+    const uf=e.uf&&e.uf!=='BR'?[`#Política${e.uf}`]:[];
+    return [`${office(e.office)} · ${e.uf}: dois patrimônios declarados, lado a lado.`, '', line(e), line(b), '',
+      'Comparação de números declarados ao TSE, não de méritos. '+dis,
+      `Páginas: ${SITE_BASE}/c/${e.id}.html · ${SITE_BASE}/c/${b.id}.html`, '', HASHTAGS.concat(uf).join(' ')].join('\n');
+  }
+  if(fmt==='fix'){
+    const what=$('#fix-what').value.trim(), why=$('#fix-why').value.trim();
+    const now=dataset==='new'?`${fmtBRL(e.a2026)} declarados em 2026`:`${fmtBRL(e.a2022)} (2022) → ${fmtBRL(e.a2026)} (2026)${e.change_pct!=null?', '+fmtPct(e.change_pct):''}`;
+    return [`CORREÇÃO — ${nome} (${e.party}-${e.uf}).`, '', `Publicamos anteriormente: ${what||'[dado anterior]'}.`, `O dado vigente é: ${now}.`,
+      why?`Motivo: ${why}.`:'', '', 'Erramos, corrigimos no mesmo formato. '+dis, `Fonte e lista de bens: ${SITE_BASE}/c/${e.id}.html`, '', HASHTAGS.join(' ')]
+      .join('\n').replace(/\n{3,}/g,'\n\n');
+  }
   const who=`${nome} (${e.party}-${e.uf}, ${office(e.office)})`;
   const custom=$('#s-head').value.trim();
   let head;
@@ -360,16 +428,44 @@ function fillCands(){
   $('#count').textContent=VIEW.length
     ? `— ${VIEW.length.toLocaleString('pt-BR')} encontrado(s)${VIEW.length>LIMIT?`, exibindo ${LIMIT}`:''}`
     : '— nenhum encontrado';
+  if(fmt==='duel') fillRivals();
   render();
 }
 const cur=()=>VIEW[+$('#s-cand').value||0];
+$('#s-cand').addEventListener('change',()=>{ if(fmt==='duel') fillRivals(); });
 
 function seg(id,cb){ $(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{
   $(id).querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); cb(b.dataset.v); });}
-seg('#s-fmt',v=>{fmt=v;$('#top-hint').hidden=!(v==='top5'||v==='carousel');
-  $('#btn-dl').textContent=v==='carousel'?'⬇ Baixar carrossel (capa + 5)':'⬇ Baixar PNG';render()});
+function setFmt(v){
+  fmt=v;
+  // os dois grupos de formato funcionam como um só
+  document.querySelectorAll('#s-fmt button,#s-fmt2 button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  $('#top-hint').hidden=!(v==='top5'||v==='carousel');
+  $('#duel-wrap').hidden=(v!=='duel');
+  $('#fix-wrap').hidden=(v!=='fix');
+  $('#btn-dl').textContent=v==='carousel'?'⬇ Baixar carrossel (capa + 5)':'⬇ Baixar PNG';
+  if(v==='duel') fillRivals();
+  render();
+}
+seg('#s-fmt',setFmt); seg('#s-fmt2',setFmt);
 seg('#s-theme',v=>{theme=v;render()});
 seg('#s-set',applyDataset);
+$('#s-cand2').onchange=render;
+$('#fix-what').oninput=render; $('#fix-why').oninput=render;
+
+/* ---- Duelo: adversários = mesma disputa (cargo + UF), mesmo conjunto ---- */
+let RIVALS=[];
+function fillRivals(){
+  const e=cur(); const sc=$('#s-cand2'); sc.innerHTML='';
+  RIVALS = e ? POOL().filter(x=>x.id!==e.id && x.office===e.office && x.uf===e.uf)
+      .sort((a,b)=>(b.a2026??0)-(a.a2026??0)) : [];
+  RIVALS.forEach((x,i)=>{ const o=document.createElement('option'); o.value=i;
+    o.textContent=`${cap(x.ballot_name||x.name)} (${x.party})`; sc.appendChild(o); });
+  const want=URLQ.get('vs'); const wi=want?RIVALS.findIndex(x=>x.id===want):-1;
+  sc.selectedIndex=wi>=0?wi:0; if(wi>=0) URLQ.delete('vs');
+  $('#count2').textContent=RIVALS.length?`— ${RIVALS.length} na mesma disputa`:'— ninguém mais nesta disputa';
+}
+const rival=()=>RIVALS[+$('#s-cand2').value||0];
 
 function autoHead(e){
   // manchete escolhida pelo dado mais expressivo do próprio candidato
@@ -492,6 +588,55 @@ function top5Card(){
   </div>
   ${footer()}`;
 }
+/* ---- Duelo: dois candidatos da mesma disputa, lado a lado, sem "vencedor" ---- */
+function duelSide(e){
+  const isNew=dataset==='new';
+  const stat = isNew
+    ? `<div class="stat"><div class="lbl">Declarado em 2026</div><div class="num">${fmtBRL(e.a2026)}</div><div class="sm">sem base em 2022</div></div>`
+    : `<div class="stat"><div class="lbl">2022 → 2026</div>
+         <div class="num neu">${fmtBRL(e.a2026)}</div>
+         <div class="sm">de ${fmtBRL(e.a2022)}</div></div>
+       <div class="stat"><div class="lbl">Variação declarada</div>
+         <div class="num">${e.change_abs>=0?'+':'−'}${fmtBRL(Math.abs(e.change_abs))}</div>
+         <div class="sm">${e.change_pct!=null?fmtPct(e.change_pct):'base R$ 0'}${e.multiple?` · ${fmtX(e.multiple)}`:''}</div></div>`;
+  return `<div class="side">
+    <img class="cface" src="${PHOTO_BASE}${e.id}.webp" alt="" crossorigin="anonymous" onerror="this.remove()">
+    <div class="name">${cap(e.ballot_name||e.name)}</div>
+    <div class="party">${e.party}</div>
+    ${stat}
+    ${e.outlier?'<div class="chip warn">valor atípico</div>':''}
+  </div>`;
+}
+function duelCard(a,b){
+  const story=fmt==='story';
+  const custom=$('#s-head').value.trim();
+  const head=custom||`Mesma disputa, dois patrimônios declarados.`;
+  return `
+  <div class="topbar"></div>
+  <div class="inner">
+    <div class="kicker">Enriquecímetro · ${office(a.office)} · ${a.uf}</div>
+    <div class="headline" style="font-size:64px">${head}</div>
+    <div class="duel-sub">${dataset==='new'?'Bens declarados ao TSE em 2026.':'Bens declarados ao TSE em 2022 e 2026. Comparação de números, não de méritos.'}</div>
+    <div class="duel">${duelSide(a)}<div class="vs">×</div>${duelSide(b)}</div>
+    <div style="margin-top:auto"></div>
+  </div>
+  ${footer()}`;
+}
+/* ---- Correção: mesmo card do candidato + caixa "dizia / é" ---- */
+function fixCard(e){
+  const base=candCard(e);
+  const what=$('#fix-what').value.trim(), why=$('#fix-why').value.trim();
+  const box=`<div class="fixbox">
+    <div class="row2">
+      <div><div class="lbl">O post anterior dizia</div><div class="was">${what||'(descreva o dado incorreto)'}</div></div>
+      <div><div class="lbl">O dado vigente é</div><div class="now">${dataset==='new'?fmtBRL(e.a2026)+' declarados em 2026':`${fmtBRL(e.a2022)} (2022) → ${fmtBRL(e.a2026)} (2026)${e.change_pct!=null?', '+fmtPct(e.change_pct):''}`}</div></div>
+    </div>
+    ${why?`<div class="why">Motivo: ${why}</div>`:''}
+  </div>`;
+  return base
+    .replace(/<div class="kicker">[^<]*<\/div>/, '<div class="kicker">Correção · Enriquecímetro</div>')
+    .replace('<div class="bars">', box+'<div class="bars">');
+}
 /* Carrossel: capa (Top 5) + um slide por candidato, numerado */
 function carouselCover(){ return top5Card(); }
 function carouselSlide(e,i,n){
@@ -507,7 +652,14 @@ function render(){
   p.className='post '+(fmt==='story'?'story':'feed')+(theme==='dark'?' dark':'');
   const isList=(fmt==='top5'||fmt==='carousel');
   if(!isList && !cur()){ p.innerHTML=''; $('#caption').value=''; writeURL(); return; }
-  p.innerHTML = isList ? top5Card() : candCard(cur());
+  p.classList.toggle('fix',fmt==='fix');
+  if(fmt==='duel'){
+    const b=rival();
+    p.innerHTML = b ? duelCard(cur(),b)
+      : `<div class="topbar"></div><div class="inner"><div class="kicker">Enriquecímetro</div><div class="sub" style="font-size:34px;margin-top:40px">Nenhum outro candidato da mesma disputa neste conjunto.</div></div>${footer()}`;
+  }else{
+    p.innerHTML = isList ? top5Card() : fmt==='fix' ? fixCard(cur()) : candCard(cur());
+  }
   const stageW=$('.stage').clientWidth-60;
   const s=Math.min(0.62, stageW/1080);
   $('#scaler').style.transform=`scale(${s})`;
@@ -579,7 +731,10 @@ $('#btn-dl').onclick=async()=>{
       }finally{ ghost.remove(); }
     }else{
       $('#status').textContent='Gerando PNG…';
-      const name=(fmt==='top5')?`top5-${slug(rankTitle())}-${scope}`:slug(cur().ballot_name||cur().name);
+      const me=slug(cur()?.ballot_name||cur()?.name);
+      const name=(fmt==='top5')?`top5-${slug(rankTitle())}-${scope}`
+        : fmt==='duel' ? `duelo-${me}-vs-${slug(rival()?.ballot_name||rival()?.name)}`
+        : fmt==='fix' ? `correcao-${me}` : me;
       files.push(await nodeToFile($('#post'),`enriquecimetro-${name}-${fmt}.png`));
     }
     const r=await deliver(files);
