@@ -95,7 +95,7 @@
       el(
         "div",
         { class: "who" },
-        avatar(item, { hasPhoto: hasBoth }),
+        avatar(item, { hasPhoto: item.a2026 !== null }),
         el(
           "div",
           { class: "who-text" },

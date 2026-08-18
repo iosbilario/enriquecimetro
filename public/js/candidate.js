@@ -125,7 +125,7 @@
     $("#p-avatar").replaceWith(
       avatar(detail, {
         large: true,
-        hasPhoto: years.length > 1 && ["exact", "probable"].includes(detail.match_status),
+        hasPhoto: "2026" in detail.elections,
       })
     );
     $("#p-name").textContent = displayName;

@@ -35,7 +35,7 @@
     "url_template": "https://cdn.tse.jus.br/estatistica/sead/eleicoes/eleicoes{year}/fotos/foto_cand{year}_{uf}_div.zip",
     "election": 2026,
     "thumbnail_px": 96,
-    "match_statuses": ["exact", "probable"],
+    "match_statuses": ["exact", "probable", "unverified"],
     "output_dir": "public/photos"
   },
   "attribution": {
