@@ -359,8 +359,8 @@ function buildCaption(){
   const nome=cap(e.ballot_name||e.name);
   if(fmt==='duel'){
     const b=rival(); if(!b) return '';
-    const line=x=>dataset==='new'
-      ? `${cap(x.ballot_name||x.name)} (${x.party}): ${fmtBRL(x.a2026)} declarados em 2026`
+    const line=x=>(x.a2022==null)
+      ? `${cap(x.ballot_name||x.name)} (${x.party}): ${fmtBRL(x.a2026)} declarados em 2026 · estreante, sem base 2022`
       : `${cap(x.ballot_name||x.name)} (${x.party}): ${fmtBRL(x.a2022)} → ${fmtBRL(x.a2026)}${x.change_pct!=null?` (${fmtPct(x.change_pct)})`:''}${x.outlier?' · valor atípico':''}`;
     const uf=e.uf&&e.uf!=='BR'?[`#Política${e.uf}`]:[];
     return [`${office(e.office)} · ${e.uf}: dois patrimônios declarados, lado a lado.`, '', line(e), line(b), '',
@@ -457,10 +457,12 @@ $('#fix-what').oninput=render; $('#fix-why').oninput=render;
 let RIVALS=[];
 function fillRivals(){
   const e=cur(); const sc=$('#s-cand2'); sc.innerHTML='';
-  RIVALS = e ? POOL().filter(x=>x.id!==e.id && x.office===e.office && x.uf===e.uf)
+  // Adversários vêm de QUALQUER conjunto: o que define a disputa é cargo + UF,
+  // não se o candidato tem ou não base 2022 (ex.: Lula × Flávio Bolsonaro).
+  RIVALS = e ? ALL.concat(NEW).filter(x=>x.id!==e.id && x.office===e.office && x.uf===e.uf)
       .sort((a,b)=>(b.a2026??0)-(a.a2026??0)) : [];
   RIVALS.forEach((x,i)=>{ const o=document.createElement('option'); o.value=i;
-    o.textContent=`${cap(x.ballot_name||x.name)} (${x.party})`; sc.appendChild(o); });
+    o.textContent=`${cap(x.ballot_name||x.name)} (${x.party})${x.a2022===null?' · estreante':''}`; sc.appendChild(o); });
   const want=URLQ.get('vs'); const wi=want?RIVALS.findIndex(x=>x.id===want):-1;
   sc.selectedIndex=wi>=0?wi:0; if(wi>=0) URLQ.delete('vs');
   $('#count2').textContent=RIVALS.length?`— ${RIVALS.length} na mesma disputa`:'— ninguém mais nesta disputa';
@@ -590,9 +592,10 @@ function top5Card(){
 }
 /* ---- Duelo: dois candidatos da mesma disputa, lado a lado, sem "vencedor" ---- */
 function duelSide(e){
-  const isNew=dataset==='new';
+  const isNew=(e.a2022===null||e.a2022===undefined);
   const stat = isNew
-    ? `<div class="stat"><div class="lbl">Declarado em 2026</div><div class="num">${fmtBRL(e.a2026)}</div><div class="sm">sem base em 2022</div></div>`
+    ? `<div class="stat"><div class="lbl">Declarado em 2026</div><div class="num neu">${fmtBRL(e.a2026)}</div><div class="sm">estreante · sem declaração localizada em 2022</div></div>
+       <div class="stat"><div class="lbl">Variação declarada</div><div class="num" style="color:var(--ink-faint)">—</div><div class="sm">não aplicável</div></div>`
     : `<div class="stat"><div class="lbl">2022 → 2026</div>
          <div class="num neu">${fmtBRL(e.a2026)}</div>
          <div class="sm">de ${fmtBRL(e.a2022)}</div></div>
@@ -616,7 +619,7 @@ function duelCard(a,b){
   <div class="inner">
     <div class="kicker">Enriquecímetro · ${office(a.office)} · ${a.uf}</div>
     <div class="headline" style="font-size:64px">${head}</div>
-    <div class="duel-sub">${dataset==='new'?'Bens declarados ao TSE em 2026.':'Bens declarados ao TSE em 2022 e 2026. Comparação de números, não de méritos.'}</div>
+    <div class="duel-sub">${(a.a2022==null&&b.a2022==null)?'Bens declarados ao TSE em 2026.':(a.a2022==null||b.a2022==null)?'Bens declarados ao TSE. Um dos lados não tem declaração localizada em 2022 — a variação só se aplica ao outro.':'Bens declarados ao TSE em 2022 e 2026.'} Comparação de números, não de méritos.</div>
     <div class="duel">${duelSide(a)}<div class="vs">×</div>${duelSide(b)}</div>
     <div style="margin-top:auto"></div>
   </div>
