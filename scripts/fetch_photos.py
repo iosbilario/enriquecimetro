@@ -20,14 +20,12 @@ import io
 import json
 import re
 import sys
-import urllib.request
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+import http_fetch
 from common import ROOT, load_config, read_json, resolve_path
-
-USER_AGENT = "Enriquecimetro/1.0 (projeto open-source de transparencia; github)"
 
 # Nome no ZIP: F{UF}{SQ_CANDIDATO}_div.jpg  (ex.: FAC10002544107_div.jpg)
 PHOTO_NAME_RE = re.compile(r"F[A-Z]{2}(\d+)_div\.(jpe?g|png)$", re.IGNORECASE)
@@ -66,11 +64,8 @@ def make_thumbnail(jpeg_bytes: bytes, size_px: int) -> bytes:
 
 
 def download_zip(url: str, dest: Path) -> bool:
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     try:
-        with urllib.request.urlopen(req, timeout=300) as resp, open(dest, "wb") as fh:
-            while chunk := resp.read(1 << 20):
-                fh.write(chunk)
+        http_fetch.download(url, dest, timeout=300)
         return True
     except Exception as exc:  # noqa: BLE001
         print(f"[photos] AVISO: falha ao baixar {url}: {exc}")

@@ -9,32 +9,21 @@ from __future__ import annotations
 
 import json
 import sys
-import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+import http_fetch
 from common import load_config, resolve_path
 
-USER_AGENT = "Enriquecimetro/1.0 (projeto open-source de transparencia; github)"
 TIMEOUT = 300
 
 
 def _head(url: str) -> dict:
-    req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=60) as resp:
-        return {k.lower(): v for k, v in resp.headers.items()}
+    return http_fetch.head(url, timeout=60)
 
 
 def _download(url: str, dest: Path) -> None:
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    tmp = dest.with_suffix(dest.suffix + ".part")
-    with urllib.request.urlopen(req, timeout=TIMEOUT) as resp, open(tmp, "wb") as out:
-        while True:
-            chunk = resp.read(1 << 20)
-            if not chunk:
-                break
-            out.write(chunk)
-    tmp.replace(dest)
+    http_fetch.download(url, dest, timeout=TIMEOUT)
 
 
 def main(argv: list[str]) -> int:

@@ -1,4 +1,9 @@
-# O pipeline principal de dados usa APENAS a biblioteca padrão do Python.
+# curl_cffi imita o fingerprint TLS/HTTP de um navegador (curl-impersonate).
+# Necessário desde ago/2026: o CDN do TSE (Akamai) passou a bloquear com 403
+# clientes sem esse fingerprint — usado por scripts/http_fetch.py no download
+# de todos os datasets. Ver scripts/http_fetch.py.
+curl_cffi>=0.7
+
 # Pillow é necessário somente para scripts/fetch_photos.py (miniaturas das
 # fotos oficiais de urna) — usado pelo workflow update-photos.yml.
 Pillow>=10.0
