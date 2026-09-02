@@ -7,8 +7,8 @@
 > números, não presumimos a origem. Variação patrimonial, isoladamente, não
 > indica irregularidade.
 
-Candidaturas processadas: 29270 (2022) e 20822 (2026).
-Comparações seguras (mesmo indivíduo nas duas eleições): 6283.
+Candidaturas processadas: 29270 (2022) e 20837 (2026).
+Comparações seguras (mesmo indivíduo nas duas eleições): 6280.
 
 ## Páginas
 - [Início](https://iosbilario.github.io/enriquecimetro/): busca, filtros e rankings de variação patrimonial declarada
